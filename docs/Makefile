@@ -2,7 +2,7 @@
 #
 
 # You can set these variables from the command line.
-GH_PAGES_SOURCES = source Makefile
+GH_PAGES_SOURCES = source ../polynondom.py Makefile
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = PolyNondom
