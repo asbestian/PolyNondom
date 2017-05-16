@@ -235,7 +235,45 @@ class Objectives:
                           in enumerate(self._objectives, 1)])
 
 
-class PolyNondom():
+class Points:
+    """Represents certain set of points in objective space."""
+
+    def __init__(self, id, color):
+        self.points = set()
+        self._id = id
+        self._color = color
+
+    def __iter__(self):
+        iter(self.points)
+
+    def __repr__(self):
+        return str(self.points)
+
+    def add(self, item):
+        self.points.add(item)
+
+    def update(self, items):
+        self.points.update(items)
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, identifier):
+        assert isinstance(identifier, str)
+        self._id = identifier
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, color):
+        assert isinstance(color, str)
+        self._color = color
+
+class PolyNondom:
     """Enumerates and visualises different sets of (non-dominated) points.
     
     .. glossary::
@@ -274,26 +312,26 @@ class PolyNondom():
     def __init__(self):
         """Initialises point sets and visualisation related items."""
         self._dim = 0
-        self.nd_points = set()
-        self.dom_points = set()
-        self.polynd_points = set()
+        #self.nd_points = set()
+        #self.dom_points = set()
+        #self.polynd_points = set()
         self.obj_to_polynd_points = []
-        self.monond_points = set()
+        #self.monond_points = set()
         self.polynd_boxes = set()
         self._fig = None
         self._ax = None
-        self._points = {'d': ("dominated", self.dom_points, 'black'),
-                        'n': ("non-dominated", self.nd_points, 'blue'),
-                        'p': ("polynon-dominated", self.polynd_points, 'green'),
-                        'm': ("mononon-dominated", self.monond_points, 'brown')}
+        self.points = {'d': Points('dominated', 'black'),
+                       'n': Points('non-dominated', 'red'),
+                       'p': Points('polynon-dominated', 'blue'),
+                       'm': Points('mononon-dominated', 'brown')}
         self._message = "String combined of the following letters expected:"
         self._visualised = defaultdict(list)
 
     def __str__(self):
         """Returns readable representation of different point sets."""
         output = "Points:\n"
-        for desc, points, _ in self._points.values():
-            output += desc + ": " + str(points) + "\n"
+        for points in self.points.values():
+            output += points.id + ": " + str(points) + "\n"
         return output
 
     @staticmethod
@@ -409,7 +447,7 @@ class PolyNondom():
             with open(file, mode='r', encoding='utf-8') as file:
                 for line in file:
                     for point in cls._read_line(line, delimiter):
-                        ins.nd_points.add(point) if all_nondom else \
+                        ins.points['n'].add(point) if all_nondom else \
                             points.append(point)
         except FileNotFoundError:
             print("File not found.")
@@ -421,12 +459,12 @@ class PolyNondom():
                 ins._dim = len(points[0])
                 for point in points:
                     if cls._is_nondominated(point, points):
-                        ins.nd_points.add(point)
+                        ins.points['n'].add(point)
                     else:
-                        ins.dom_points.add(point)
+                        ins.points['d'].add(point)
             else:
-                assert ins.nd_points
-                ins._dim = len(next(iter(ins.nd_points)))
+                assert ins.points['n'].points
+                ins._dim = len(next(iter(ins.points['n'])))
             ins._compute_polynondom_points()
             ins._compute_monodom_points()
             ins._compute_boxes()
@@ -438,9 +476,9 @@ class PolyNondom():
         points = list(self._generate_all_feasible_points(domain, objectives))
         for point in points:
             if self._is_nondominated(point, points):
-                self.nd_points.add(point)
+                self.points['n'].add(point)
             else:
-                self.dom_points.add(point)
+                self.points['d'].add(point)
         self._compute_polynondom_points()
         self._compute_monodom_points()
         self._compute_boxes()
@@ -499,17 +537,17 @@ class PolyNondom():
     def _compute_polynondom_points(self):
         """Computes polynon-dominated points."""
         for index in range(self._dim):
-            polynd_points = set(self._generate_nd_points(self.nd_points, index))
+            polynd_points = set(self._generate_nd_points(self.points['n'].points, index))
             self.obj_to_polynd_points.append(polynd_points)
-            self.polynd_points.update(polynd_points)
+            self.points['p'].update(polynd_points)
 
     def _compute_monodom_points(self):
         """Computes mononon-dominated points."""
-        self.monond_points.update(self.nd_points.difference(self.polynd_points))
+        self.points['m'].update(self.points['n'].points.difference(self.points['p'].points))
 
     @staticmethod
     def _compute_ax_limits(points):
-        """Computes axes limits based on dominated and non-dominated points.
+        """Update axes limits based on given points.
         
         Axis limits for each dimension are given by tuple consisting of minimal 
         objective value minus 1 and maximal objective value plus 1, 
@@ -522,21 +560,28 @@ class PolyNondom():
         assert isinstance(points, Iterable)
         return [(min(item)-1, max(item)+1) for item in zip(*points)]
 
+    def _update_ax_limits(self, points):
+        """Update axis limits."""
+        limits = PolyNondom._compute_ax_limits(points)
+        assert len(limits) >= 2
+        self._ax.set_xlim3d(*limits[0])
+        self._ax.set_ylim3d(*limits[1])
+        if len(limits) == 3:
+            self._ax.set_zlim3d(*limits[2])
+
+
     def _init_visualisation(self):
         """Initialise visualisation-related objects."""
-        assert max(len(self.nd_points), len(self.dom_points)) > 0
-        ax_limits = self._compute_ax_limits(chain(self.nd_points,
-        self.dom_points))
         self._fig = plt.figure()
         self._ax = self._fig.add_subplot(111, projection='3d')
-        self._ax.set_xlim3d(ax_limits[0])
-        self._ax.set_ylim3d(ax_limits[1])
+        self._ax.set_xlim3d(0, 10)
+        self._ax.set_ylim3d(0, 10)
         self._ax.tick_params(axis='x', labelsize=8)
         self._ax.tick_params(axis='y', labelsize=8)
         self._ax.set_xlabel(r'$c^{\top}_1 x$', fontsize=12)
         self._ax.set_ylabel(r'$c^{\top}_2 x$', fontsize=12)
         if self._dim == 3:
-            self._ax.set_zlim3d(ax_limits[2])
+            self._ax.set_zlim3d(0, 10)
             self._ax.tick_params(axis='z', labelsize=8)
             self._ax.set_zlabel(r'$c^{\top}_3 x$', fontsize=12)
         else:
@@ -610,14 +655,14 @@ class PolyNondom():
         if self._dim < 2 or self._dim > 3:
             print("Can only visualise 2- and 3-dimensional objective spaces.\n")
         elif not isinstance(id, str) or \
-                any([item not in self._points.keys() for item in id]):
+                any([item not in self.points.keys() for item in id]):
             print(self._message)
-            print(" ".join(self._points.keys()))
+            print(" ".join(self.points.keys()))
         else:
             if not self._fig:
                 self._init_visualisation()
             for i in id.strip("".join(self._visualised.keys())):
-                _, points, p_color = self._points.get(i)
+                _, points, p_color = self.points.get(i)
                 if points:
                     color = p_color if my_color is None else my_color
                     self._visualise_points(i, points, color=color,
@@ -626,6 +671,7 @@ class PolyNondom():
                     if self._dim == 3 and with_lines:
                         self._visualise_lines(i, points, color=color,
                                               width=my_width, style=my_style)
+            import pdb; pdb.set_trace()
             plt.show()
 
     def undo_visualise(self, id):
