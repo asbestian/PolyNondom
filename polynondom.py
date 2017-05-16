@@ -242,6 +242,7 @@ class Points:
         self.points = set()
         self._id = id
         self._color = color
+        self._visualised_items = []
 
     def __iter__(self):
         iter(self.points)
@@ -254,6 +255,18 @@ class Points:
 
     def update(self, items):
         self.points.update(items)
+
+    def add_visualised_items(self, items):
+        self._visualised_items.append(items)
+
+    def remove_visualised_items(self):
+        for elem in self._visualised_items:
+            elem.remove()
+        self._visualised_items = []
+
+    @property
+    def is_visualised(self):
+        return self._visualised_items != []
 
     @property
     def id(self):
@@ -312,11 +325,7 @@ class PolyNondom:
     def __init__(self):
         """Initialises point sets and visualisation related items."""
         self._dim = 0
-        #self.nd_points = set()
-        #self.dom_points = set()
-        #self.polynd_points = set()
         self.obj_to_polynd_points = []
-        #self.monond_points = set()
         self.polynd_boxes = set()
         self._fig = None
         self._ax = None
@@ -325,13 +334,12 @@ class PolyNondom:
                        'p': Points('polynon-dominated', 'blue'),
                        'm': Points('mononon-dominated', 'brown')}
         self._message = "String combined of the following letters expected:"
-        self._visualised = defaultdict(list)
 
     def __str__(self):
         """Returns readable representation of different point sets."""
         output = "Points:\n"
-        for points in self.points.values():
-            output += points.id + ": " + str(points) + "\n"
+        for subset in self.points.values():
+            output += subset.id + ": " + str(subset) + "\n"
         return output
 
     @staticmethod
@@ -574,14 +582,14 @@ class PolyNondom:
         """Initialise visualisation-related objects."""
         self._fig = plt.figure()
         self._ax = self._fig.add_subplot(111, projection='3d')
-        self._ax.set_xlim3d(0, 10)
-        self._ax.set_ylim3d(0, 10)
+        self._ax.set_xlim3d(-20, 20)
+        self._ax.set_ylim3d(-20, 20)
         self._ax.tick_params(axis='x', labelsize=8)
         self._ax.tick_params(axis='y', labelsize=8)
         self._ax.set_xlabel(r'$c^{\top}_1 x$', fontsize=12)
         self._ax.set_ylabel(r'$c^{\top}_2 x$', fontsize=12)
         if self._dim == 3:
-            self._ax.set_zlim3d(0, 10)
+            self._ax.set_zlim3d(-20, 20)
             self._ax.tick_params(axis='z', labelsize=8)
             self._ax.set_zlabel(r'$c^{\top}_3 x$', fontsize=12)
         else:
@@ -597,11 +605,11 @@ class PolyNondom:
         x, y, *z = zip(*points)
         if not z:
             z = [0]
-        self._visualised[id].append(self._ax.scatter(x, y, *z, zdir='z',
-                                                     c=color, color=color,
-                                                     s=marker_size,
-                                                     marker=marker,
-                                                     depthshade=False))
+        self.points[id].add_visualised_items(self._ax.scatter(x, y, *z, zdir='z',
+                                                              c=color, color=color,
+                                                              s=marker_size,
+                                                              marker=marker,
+                                                              depthshade=False))
         plt.pause(0.001)
 
     def _visualise_lines(self, id, points, *, color, width, style):
@@ -614,21 +622,21 @@ class PolyNondom:
         min_y, _ = self._ax.get_ylim3d()
         min_z, _ = self._ax.get_zlim3d()
         for x, y, z in points:
-            self._visualised[id].extend(self._ax.plot([x, x], [min_y, y],
-                                                      [min_z, min_z],
-                                                      color=color,
-                                                      linewidth=width,
-                                                      linestyle=style))
-            self._visualised[id].extend(self._ax.plot([min_x, x], [y, y],
-                                                      [min_z, min_z],
-                                                      color=color,
-                                                      linewidth=width,
-                                                      linestyle=style))
-            self._visualised[id].extend(self._ax.plot([x, x], [y, y],
-                                                      [min_z, z],
-                                                      color=color,
-                                                      linewidth=width,
-                                                      linestyle=style))
+            self.points[id].add_visualised_items(*self._ax.plot([x, x], [min_y, y],
+                                                               [min_z, min_z],
+                                                               color=color,
+                                                               linewidth=width,
+                                                               linestyle=style))
+            self.points[id].add_visualised_items(*self._ax.plot([min_x, x], [y, y],
+                                                               [min_z, min_z],
+                                                               color=color,
+                                                               linewidth=width,
+                                                               linestyle=style))
+            self.points[id].add_visualised_items(*self._ax.plot([x, x], [y, y],
+                                                               [min_z, z],
+                                                               color=color,
+                                                               linewidth=width,
+                                                               linestyle=style))
             plt.pause(0.001)
 
     def visualise(self, id, *, my_color=None, my_width=0.8, my_style='--',
@@ -661,18 +669,19 @@ class PolyNondom:
         else:
             if not self._fig:
                 self._init_visualisation()
-            for i in id.strip("".join(self._visualised.keys())):
-                _, points, p_color = self.points.get(i)
-                if points:
-                    color = p_color if my_color is None else my_color
-                    self._visualise_points(i, points, color=color,
+            for i in id:
+                if self.points[i].points:
+                    color = self.points[i].color if my_color is None else my_color
+                    self._visualise_points(i, self.points[i].points, color=color,
                                            marker=my_marker,
                                            marker_size=my_marker_size)
                     if self._dim == 3 and with_lines:
-                        self._visualise_lines(i, points, color=color,
+                        self._visualise_lines(i, self.points[i].points, color=color,
                                               width=my_width, style=my_style)
-            import pdb; pdb.set_trace()
-            plt.show()
+            if __name__ == '__main__':
+                plt.show()
+            else:
+                plt.draw()
 
     def undo_visualise(self, id):
         """Remove visualisation objects corresponding to given identifier.
@@ -683,16 +692,13 @@ class PolyNondom:
        
         :Example: ins.undo_visualize('dp')
         """
-        if not self._visualised:
-            print("Nothing to undo.")
-        elif not isinstance(id, str) or \
-                any([item not in self._visualised.keys() for item in id]):
+        if not isinstance(id, str) or \
+                not all([self.points[item].is_visualised for item in id]):
             print(self._message)
-            print(" ".join(self._visualised.keys()))
+            print(" ".join([key for key in self.points.keys() if self.points[key].is_visualised]))
         else:
             for item in id:
-                for elem in self._visualised.pop(item):
-                    elem.remove()
+                self.points[item].remove_visualised_items()
             plt.draw()
 
     def visualise_polynd_boxes(self):
