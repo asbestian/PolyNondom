@@ -566,7 +566,7 @@ class PolyNondom:
         :return: List of tuples
         """
         assert isinstance(points, Iterable)
-        return [(min(item)-1, max(item)+1) for item in zip(*points)]
+        return list([(min(item)-1, max(item)+1) for item in zip(*points)])
 
     def _update_ax_limits(self, points):
         """Update axis limits."""
@@ -596,13 +596,13 @@ class PolyNondom:
             self._ax.set_zticks([])
             self._ax.w_zaxis.line.set_visible(False)
 
-    def _visualise_points(self, id, points, *, color, marker, marker_size):
+    def _visualise_points(self, id, *, color, marker, marker_size):
         """Visualises given points.
 
         Visualises given points and saves corresponding matplotlib objects 
         in _visualised map.
         """
-        x, y, *z = zip(*points)
+        x, y, *z = zip(*self.points[id].points)
         if not z:
             z = [0]
         self.points[id].add_visualised_items(self._ax.scatter(x, y, *z, zdir='z',
@@ -612,7 +612,7 @@ class PolyNondom:
                                                               depthshade=False))
         plt.pause(0.001)
 
-    def _visualise_lines(self, id, points, *, color, width, style):
+    def _visualise_lines(self, id, *, color, width, style):
         """Visualises line projections corresponding to given points.
 
         Visualises line projections of given points and saves corresponding 
@@ -621,7 +621,7 @@ class PolyNondom:
         min_x, _ = self._ax.get_xlim3d()
         min_y, _ = self._ax.get_ylim3d()
         min_z, _ = self._ax.get_zlim3d()
-        for x, y, z in points:
+        for x, y, z in self.points[id].points:
             self.points[id].add_visualised_items(*self._ax.plot([x, x], [min_y, y],
                                                                [min_z, min_z],
                                                                color=color,
@@ -640,7 +640,7 @@ class PolyNondom:
             plt.pause(0.001)
 
     def visualise(self, id, *, my_color=None, my_width=0.8, my_style='--',
-                  my_marker='o', my_marker_size=40, with_lines=True):
+                  my_marker='o', my_marker_size=40, with_lines=True, show=True):
         """Visualises point set corresponding to id.
         
         :param str id: identifier corresponding to (combinations of) \
@@ -669,19 +669,29 @@ class PolyNondom:
         else:
             if not self._fig:
                 self._init_visualisation()
-            for i in id:
-                if self.points[i].points:
-                    color = self.points[i].color if my_color is None else my_color
-                    self._visualise_points(i, self.points[i].points, color=color,
-                                           marker=my_marker,
+            for item in id:
+                if self.points[item].points:
+                    color = self.points[item].color if my_color is None else my_color
+                    self._visualise_points(item, color=color, marker=my_marker,
                                            marker_size=my_marker_size)
-                    if self._dim == 3 and with_lines:
-                        self._visualise_lines(i, self.points[i].points, color=color,
-                                              width=my_width, style=my_style)
-            if __name__ == '__main__':
-                plt.show()
-            else:
-                plt.draw()
+            self._update_ax_limits(set.union(*[self.points[key].points
+                                               for key in self.points.keys() if
+                                               self.points[key].is_visualised]))
+            if self._dim == 3 and with_lines:
+                for item in id:
+                    if self.points[item].points:
+                        color = self.points[item].color if my_color is None else my_color
+                        self._visualise_lines(item, color=color, width=my_width,
+                                              style=my_style)
+            if show:
+                if __name__ == '__main__':
+                    plt.show()
+                else:
+                    plt.draw()
+
+    def save_figure(self, output_name, *, dpi=400, elevation=30, azimuth=50):
+        self._ax.view_init(elevation, azimuth)
+        self._fig.savefig(output_name, dpi=dpi)
 
     def undo_visualise(self, id):
         """Remove visualisation objects corresponding to given identifier.
@@ -720,7 +730,7 @@ class PolyNondom:
                                   (Default is blue)
         :param float my_alpha: alpha value used for coloring faces
         
-        :Example: ins.visualise((3, 4), (5, 7), (3, 5), my_face_color='red')
+        :Example: ins.visualise_box((3, 4), (5, 7), (3, 5), my_face_color='red')
         
         .. todo::
            Adjust size of figure to include box in any case.
@@ -825,3 +835,5 @@ if __name__ == '__main__':
     if ins and args.vis:
         ins.visualise("".join(args.vis), my_color=args.color,
                       with_lines=args.lines)
+
+
