@@ -769,6 +769,9 @@ class PolyNondom:
 
     def close_visualisation(self):
         """Closes current visualisation window and resets related elements."""
+        for key in self.points.keys():
+            if self.points[key].is_visualised:
+                self.points[key].remove_visualised_items()
         plt.close(self._fig)
         self._fig = None
         self._ax = None
