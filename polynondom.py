@@ -309,15 +309,14 @@ class PolyNondom:
     See also `mathematical definitions <https://opus4.kobv.de/opus4-zib/files/6128/report_16-55.pdf>`_
 
     :ivar int _dim: Dimension of objective space
-    :ivar set nd_points: non-dominated points
-    :ivar set dom_points: dominated points
-    :ivar set polynd_points: polynon-dominated points
+    :ivar Figure _fig: Figure object of matplotlib
+    :ivar Axes _ax: Axes object of matplotlib
+    :ivar dict points: Maps indentifier to `Points`
     :ivar list obj_to_polynd_points: maps objective to polynon-dominated points
     :ivar set monond_points: mononon-dominated points
     :ivar set polynd_boxes: feasible boxes given by polynon-dominated points
-    :ivar Figure _fig: Figure object of matplotlib
-    :ivar Axes _ax: Axes object of matplotlib
-    :ivar dict _points: Maps indentifier to (description, point_set, color)
+
+
     :ivar str _message: Info message 
     :ivar defaultdict _visualised: Keeps track of what is already visualised
     """
@@ -325,8 +324,6 @@ class PolyNondom:
     def __init__(self):
         """Initialises point sets and visualisation related items."""
         self._dim = 0
-        self.obj_to_polynd_points = []
-        self.polynd_boxes = set()
         self._fig = None
         self._ax = None
         self.points = {'d': Points('dominated', 'black'),
@@ -334,6 +331,9 @@ class PolyNondom:
                        'p': Points('polynon-dominated', 'blue'),
                        'm': Points('mononon-dominated', 'brown')}
         self._message = "String combined of the following letters expected:"
+        self.obj_to_polynd_points = []
+        self.polynd_boxes = []
+        self._visualised_boxes = []
 
     def __str__(self):
         """Returns readable representation of different point sets."""
@@ -507,7 +507,6 @@ class PolyNondom:
         assert isinstance(points, Iterable)
         assert points
         dim = len(next(iter(points)))
-        assert dim == len(points)
         box = []
         for index, elem in enumerate(zip(*points)):
             lhs = max([elem[j] for j in range(dim) if j != index])
@@ -711,6 +710,12 @@ class PolyNondom:
                 self.points[item].remove_visualised_items()
             plt.draw()
 
+    def undo_box_visualisation(self):
+        """Removes visualised boxes."""
+        for box in self._visualised_boxes:
+            box.remove()
+        self._visualised_boxes = []
+
     def visualise_polynd_boxes(self):
         """Visualises all feasible boxes given by polynon-dominated points."""
         for box in self.polynd_boxes:
@@ -753,19 +758,21 @@ class PolyNondom:
                 x_z = meshgrid(x, z, sparse=True)
                 y_z = meshgrid(y, z, sparse=True)
                 for i in interval1:
-                    self._visualised['b'].append(self._ax.plot_surface(i, *y_z,
+                    self._visualised_boxes.append(self._ax.plot_surface(i, *y_z,
                                                                        facecolors=my_face_color,
                                                                        alpha=my_alpha))
                 for i in interval2:
-                    self._visualised['b'].append(self._ax.plot_surface(x_z[0],
+                    self._visualised_boxes.append(self._ax.plot_surface(x_z[0],
                                                                        i, x_z[1],
                                                                        facecolors=my_face_color,
                                                                        alpha=my_alpha))
                 for i in interval3:
-                    self._visualised['b'].append(self._ax.plot_surface(*x_y, i,
+                    self._visualised_boxes.append(self._ax.plot_surface(*x_y, i,
                                                                        facecolors=my_face_color,
                                                                        alpha=my_alpha))
             plt.draw()
+
+
 
     def close_visualisation(self):
         """Closes current visualisation window and resets related elements."""
