@@ -311,14 +311,12 @@ class PolyNondom:
     :ivar int _dim: Dimension of objective space
     :ivar Figure _fig: Figure object of matplotlib
     :ivar Axes _ax: Axes object of matplotlib
-    :ivar dict points: Maps indentifier to `Points`
+    :ivar str _message: Info message
+    :ivar dict points: Maps indentifier to :class:`Points`
     :ivar list obj_to_polynd_points: maps objective to polynon-dominated points
-    :ivar set monond_points: mononon-dominated points
-    :ivar set polynd_boxes: feasible boxes given by polynon-dominated points
-
-
-    :ivar str _message: Info message 
-    :ivar defaultdict _visualised: Keeps track of what is already visualised
+    :ivar list polynd_boxes: Container for feasible boxes given by \
+          polynon-dominated points
+    :ivar list visualised_boxes: Container for visualised box elements
     """
 
     def __init__(self):
@@ -326,14 +324,14 @@ class PolyNondom:
         self._dim = 0
         self._fig = None
         self._ax = None
+        self._message = "String combined of the following letters expected:"
         self.points = {'d': Points('dominated', 'black'),
                        'n': Points('non-dominated', 'red'),
                        'p': Points('polynon-dominated', 'blue'),
                        'm': Points('mononon-dominated', 'brown')}
-        self._message = "String combined of the following letters expected:"
         self.obj_to_polynd_points = []
         self.polynd_boxes = []
-        self._visualised_boxes = []
+        self.visualised_boxes = []
 
     def __str__(self):
         """Returns readable representation of different point sets."""
