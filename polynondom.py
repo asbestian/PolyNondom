@@ -523,7 +523,7 @@ class PolyNondom:
             except InfeasibleBoxError:
                 logging.info("Infeasible box: %s", str(prod))
             else:
-                self.polynd_boxes.add(box)
+                self.polynd_boxes.append(box)
 
     def _generate_nd_points(self, points, except_obj_index=None):
         """Generates non-dominated points w.r.t. given points

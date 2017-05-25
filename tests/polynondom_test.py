@@ -57,7 +57,7 @@ class PolyNondomTest(TestCase):
         self.assertEqual(ins.points['n'].points, self.expected_nd_points)
         self.assertEqual(ins.points['p'].points, self.expected_polynd_points)
         self.assertEqual(ins.points['m'].points, self.expected_monond_points)
-        self.assertEqual(ins.polynd_boxes, self.expected_polynd_boxes)
+        self.assertEqual(set(ins.polynd_boxes), self.expected_polynd_boxes)
         assert os.path.exists(temp.name)
         os.remove(temp.name)
         assert not os.path.exists(temp.name)
@@ -72,7 +72,7 @@ class PolyNondomTest(TestCase):
         self.assertEqual(ins.points['n'].points, self.expected_nd_points)
         self.assertEqual(ins.points['p'].points, self.expected_polynd_points)
         self.assertEqual(ins.points['m'].points, self.expected_monond_points)
-        self.assertEqual(ins.polynd_boxes, self.expected_polynd_boxes)
+        self.assertEqual(set(ins.polynd_boxes), self.expected_polynd_boxes)
 
     def test_is_dominated(self):
         a = (1, 1, 1, 1)
