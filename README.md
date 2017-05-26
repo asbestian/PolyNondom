@@ -1,5 +1,5 @@
-PolyNondom
-==========
+About
+------
 
 PolyNondom is a small tool that helps to enumerate and visualise
 different sets of points, in particular, different subsets of
@@ -19,7 +19,7 @@ Documentation
 
 The documentation for PolyNondom
 is [online available ](https://asbestian.github.io/PolyNondom/).  It
-can compiled in the `/doc` folder via `make html` (provided
+can also be compiled offline in the `/doc` folder via `make html` (provided
 that [sphinx](http://www.sphinx-doc.org/en/stable/) is installed).
 
 Examples
