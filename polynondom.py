@@ -2,92 +2,30 @@
 
 """Module for enumerating and visualising non-dominated points.
 
-This moddule comprises classes for different feasible domains, a class for 
+This module comprises classes for different feasible domains, a class for
 multiple objectives and a class for enumerating and visualising 
 different subsets of (non-dominated) points.
 
 Available classes
-==================
+-----------------
 
-- :class:`GenericDomain` represents the feasible domain of a(n abstract) 
-  generic optimisation problem.
+:class:`GenericDomain`
+   represents the feasible domain of a(n abstract) generic optimisation problem.
 
-- :class:`AssignmentDomain` represents the feasible domain of an 
-  assignment problem.
+:class:`AssignmentDomain`
+   represents the feasible domain of an assignment problem.
 
-- :class:`CubeDomain` represents the feasible domain given by the vertices 
-  of a standard cube.
+:class:`CubeDomain`
+   represents the feasible domain given by the vertices of a standard cube.
 
-- :class:`ExplicitDomain` represents the feasible domain given by an 
-  explicitly given set of feasible solutions.
+:class:`ExplicitDomain`
+   represents the feasible domain given by an explicitly given set of feasible solutions.
 
-- :class:`Objectives` represents the objectives of a multi-criteria 
-  optimisation problem.
+:class:`Objectives`
+   represents the objectives of a multi-criteria optimisation problem.
 
-- :class:`PolyNondom` enumerates and visualises different sets of 
-  (non-dominated) points. 
-
-
-Command Line Arguments
-=======================
-
-.. note:: Not all features of the above classes are available through 
-   the command line interface.
-
-Positional arguments
----------------------
-
-- *read* specifies that pre-computed points are to be read from a file
-
-- *create* specifies that the feasible domain and corresponding objectives 
-   are to be created 
-
-To display full help information: ``$ polynondom.py (read|create) -h``
-
-Cmd args for *read*
-++++++++++++++++++++
-
-- ``-v | --visualise {d,n,m,p} [{d,n,m,p} ...]`` specifies which points to 
-   visualise: (d)ominated, (n)on-dominated, (p)olynon-dominated, 
-   (m)ononon-dominated
-
-- ``--color {red,blue,black,brown,green}`` specifies point color 
-   for visualisation
-
-- ``--lines`` specifies that line projections should be visualised 
-   (defaults to False)
-
-- ``-f|--file FILE`` specifies file containing points to be read 
-
-- ``--delim delimiter`` specifies delimiter character (defaults to space)
-
-- ``--allNondom`` specifies that all given points are non-dominated 
-   (defaults to False)
-
-Cmd args for *create*
-++++++++++++++++++++++
-
-- ``-v | --visualise {d,n,m,p} [{d,n,m,p} ...]`` specifies which points 
-   to visualise: (d)ominated, (n)on-dominated, (p)olynon-dominated, 
-   (m)ononon-dominated
-
-- ``--color {red,blue,black,brown,green}`` specifies point color 
-   for visualisation 
-
-- ``--lines`` specifies that line projections should be visualised 
-   (defaults to False)
-
-- ``-n | --noObjs INTEGER`` specifies number of objectives
-  
-- ``--randBounds INTEGER INTEGER`` specifies lower and upper bound for 
-   random objective coefficients
-
-- ``-a | --assignment INTEGER`` specifies number of agents of considered 
-   assignment domain
-
-- ``-c | --cube INTEGER`` specifies dimension of cube of considered 
-   cube domain
-
+:class:`PolyNondom`
+   enumerates and visualises different sets of (non-dominated) points.
 """
 
 from argparse import ArgumentParser
@@ -236,30 +174,57 @@ class Objectives:
 
 
 class Points:
-    """Represents certain set of points in objective space."""
+    """Represents certain set of points in objective space.
 
-    def __init__(self, id, color):
-        self.points = set()
-        self._id = id
+    :ivar str _id: Identifier for points
+    :ivar str _color: Color used for visualisation of points
+    :ivar list _visualised_items: Container for visualised items
+    :ivar set points: Container for points
+    """
+
+    def __init__(self, identifier, color):
+        """Initialises points and visualisation related items.
+
+        :param str identifier: Identifier corresponding to point set
+        :param str color: Color used for visualisation point set
+        """
+        self._id = identifier
         self._color = color
         self._visualised_items = []
+        self.points = set()
 
     def __iter__(self):
+        """Iterator for points."""
         iter(self.points)
 
     def __repr__(self):
+        """Returns readable representation of points."""
         return str(self.points)
 
     def add(self, item):
+        """Add item to points.
+
+        :param tuple item: Point belonging to point set
+        """
         self.points.add(item)
 
     def update(self, items):
+        """Add items to points.
+
+        :param iterable items: Points belonging to point set
+        """
         self.points.update(items)
 
     def add_visualised_items(self, items):
+        """Add items to container storing visualised objects.
+
+        :param items: Visualised items
+        :type items: :class:`matplotlib.collections.PathCollection`
+        """
         self._visualised_items.append(items)
 
     def remove_visualised_items(self):
+        """Remove all visualised items from matplotlib figure."""
         for elem in self._visualised_items:
             elem.remove()
         self._visualised_items = []
@@ -300,7 +265,10 @@ class PolyNondom:
        A point is *y* is dominated if *y* is not non-dominated.
         
     polynon-dominated point
-       A non-dominated point *y* is polynon-dominated if 
+       A non-dominated point *y* is polynon-dominated (w.r.t. the underlying multi-objective problem)
+       if the projection of the point is also non-dominated for multi-objective problem where one of the
+
+
  
     mononon-dominated point
        A non-dominated point *y* is mononon-dominated if *y* is not 
@@ -320,7 +288,7 @@ class PolyNondom:
     """
 
     def __init__(self):
-        """Initialises point sets and visualisation related items."""
+        """Initialises different point sets and visualisation related items."""
         self._dim = 0
         self._fig = None
         self._ax = None
@@ -344,7 +312,7 @@ class PolyNondom:
     def _generate_all_feasible_points(domain, objectives):
         """Generator for feasible points in objective space.
         
-        :param Iterable domain: Feasible domain
+        :param iterable domain: Feasible domain
         :param `Objectives` objectives: Multiple objectives
         :return: Image in objective space
         :rtype: tuple
@@ -771,7 +739,6 @@ class PolyNondom:
             plt.draw()
 
 
-
     def close_visualisation(self):
         """Closes current visualisation window and resets related elements."""
         for key in self.points.keys():
@@ -781,54 +748,53 @@ class PolyNondom:
         self._fig = None
         self._ax = None
 
-if __name__ == '__main__':
-    parser = ArgumentParser(description="Enumerates and visualises different \
-                                         sets of non-dominated points")
+
+def get_cmd_line_parser():
+    """Command line interface."""
+    parser = ArgumentParser(description='Enumerates and visualises different \
+                                         sets of non-dominated points')
     parent_parser = ArgumentParser(add_help=False)
+    parent_parser.add_argument('-f', '--file', metavar="input_file", type=str, dest='file',
+                               help='Each line in the input file is assumed to contain an opening bracket [  and a \
+                                    closing bracket ] which contain the input values.',
+                               required=True)
+    parent_parser.add_argument('--delim', default=' ', type=str,
+                               help='Delimiter used to delimited the input values within the brackets (defaults to space).',
+                               metavar='delimiter', dest='delim')
     parent_parser.add_argument('-v', '--visualise', type=str, default="",
-                        help="specify which points to visualise: (d)ominated,\
-                             (n)on-dominated, (p)olynon-dominated,\
-                             (m)ononon-dominated",
-                        nargs='+', dest='vis', choices=['d', 'n', 'm', 'p'])
-    parent_parser.add_argument('--color', type=str, default=None,
-                        help="specify color",
-                        choices=['red', 'blue', 'black', 'brown', 'green'])
-    parent_parser.add_argument('--lines', default=True, action='store_false',
-                               help="switch to specify that line projections \
-                                    should not be displayed (defaults to True)")
-    subparsers = parser.add_subparsers(help='help for commands', dest='command')
-    point_parser = subparsers.add_parser('read', help='read help',
+                               help="specify which points to visualise: (d)ominated,\
+                               (n)on-dominated, (p)olynon-dominated,\
+                               (m)ononon-dominated",
+                                 nargs='+', dest='vis', choices=['d', 'n', 'm', 'p'])
+    parent_parser.add_argument('-c', '--color', type=str, default=None,
+                                 help="Color used for point visualisation",
+                                 choices=['red', 'blue', 'black', 'brown', 'green'])
+    parent_parser.add_argument('--noLines', default=True, action='store_true',
+                         help='Specify that line projections of points should not be displayed. This \
+                              might improve the general overview in 3d visualisation if many points are involved.')
+    subparsers = parser.add_subparsers(dest='command')
+    point_parser = subparsers.add_parser('points', description='Read pre-computed points given in input file.',
                                          parents=[parent_parser])
-    point_parser.add_argument('-f', '--file', help='file containing points',
-                              metavar="FILE", type=str, dest='p_file',
-                              required=True)
-    point_parser.add_argument('--delim', default=' ', type=str,
-                              help="specify delimiter character \
-                              (defaults to space)", metavar='delimiter',
-                              dest='p_delim')
     point_parser.add_argument('--allNondom', default=False,
-                              help="switch to specify that all points are \
-                                   non-dominated (defaults to False)",
-                              action='store_false', dest='p_allnondom')
-    obj_parser = subparsers.add_parser('create', help='create help',
-                                       parents=[parent_parser])
-    obj_parser.add_argument('-n', '--noObjs', required=True,
-                            help='specify number of objectives',
-                            dest='o_num', type=int, metavar='INTEGER')
-    obj_parser.add_argument('--randBounds', type=int, dest='o_rand',
-                            help='Lower and upper bound for random number',
-                            metavar="INTEGER", required=False,
-                            nargs=2, default=(-10, 10))
+                              help='Switch to indicate that all pre-computed points are known to be non-dominated (defaults to False)',
+                              action='store_false', dest='allnondom')
+    obj_parser = subparsers.add_parser('objs', parents=[parent_parser],
+                                       description='Read objectives given in input file.')
+    obj_parser.add_argument('-n', '--numObjs', required=True,
+                        help='Specify the number of objectives that should be read from the input file.',
+                        dest='o_num', type=int, metavar='integer')
     obj_group = obj_parser.add_mutually_exclusive_group(required=True)
-    obj_group.add_argument("-a", "--assignment", metavar='INTEGER', type=int,
-                           help="Number of agents of considered \
-                                assignment domain", dest='a_dim')
-    obj_group.add_argument("-c", "--cube", metavar='INTEGER', type=int,
-                           help="Dimension of cube of considered cube domain",
-                           dest='c_dim')
-    args = parser.parse_args()
+    obj_group.add_argument('--assignment', action='store_true',
+                           help='Specify that corresponding domain is an assignment problem.')
+    obj_group.add_argument('--cube', action='store_true',
+                           help='Specify that corresponding domain are the vertices of a cube.')
+    return parser
+
+if __name__ == '__main__':
+    my_parser = get_cmd_line_parser()
+    args = my_parser.parse_args()
     ins = None
-    if args.command == 'create':
+    if args.command == 'objs':
         if args.a_dim:
             domain = AssignmentDomain(args.a_dim)
         else:

@@ -10,12 +10,11 @@ Welcome to PolyNondom's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   introduction
+   basic_usage
+   cmd
    polynondom
-
-
-Indices and tables
-==================
-
+   glossary
+   
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`

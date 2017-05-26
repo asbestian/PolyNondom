@@ -1,10 +1,9 @@
-polynondom module
-=================
+Module documentation
+--------------------
 
 .. automodule:: polynondom
-    :members:
-    :show-inheritance:
-    :inherited-members:
-    :special-members: __call__
-
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__
 
