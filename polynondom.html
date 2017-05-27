@@ -1,0 +1,661 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Module documentation &mdash; PolyNondom 0.9 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="PolyNondom 0.9 documentation" href="index.html"/>
+        <link rel="next" title="Glossary" href="glossary.html"/>
+        <link rel="prev" title="Command Line Interface" href="cmd.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PolyNondom
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Basic usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmd.html">Command Line Interface</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Module documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#available-classes">Available classes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">PolyNondom</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Module documentation</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/polynondom.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-polynondom">
+<span id="module-documentation"></span><h1>Module documentation<a class="headerlink" href="#module-polynondom" title="Permalink to this headline">¶</a></h1>
+<p>Module for enumerating and visualising non-dominated points.</p>
+<p>This module comprises classes for different feasible domains, a class for
+multiple objectives and a class for enumerating and visualising 
+different subsets of (non-dominated) points.</p>
+<div class="section" id="available-classes">
+<h2>Available classes<a class="headerlink" href="#available-classes" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><a class="reference internal" href="#polynondom.GenericDomain" title="polynondom.GenericDomain"><code class="xref py py-class docutils literal"><span class="pre">GenericDomain</span></code></a></dt>
+<dd>represents the feasible domain of a(n abstract) generic optimisation problem.</dd>
+<dt><a class="reference internal" href="#polynondom.AssignmentDomain" title="polynondom.AssignmentDomain"><code class="xref py py-class docutils literal"><span class="pre">AssignmentDomain</span></code></a></dt>
+<dd>represents the feasible domain of an assignment problem.</dd>
+<dt><a class="reference internal" href="#polynondom.CubeDomain" title="polynondom.CubeDomain"><code class="xref py py-class docutils literal"><span class="pre">CubeDomain</span></code></a></dt>
+<dd>represents the feasible domain given by the vertices of a standard cube.</dd>
+<dt><a class="reference internal" href="#polynondom.ExplicitDomain" title="polynondom.ExplicitDomain"><code class="xref py py-class docutils literal"><span class="pre">ExplicitDomain</span></code></a></dt>
+<dd>represents the feasible domain given by an explicitly given set of feasible solutions.</dd>
+<dt><a class="reference internal" href="#polynondom.Objectives" title="polynondom.Objectives"><code class="xref py py-class docutils literal"><span class="pre">Objectives</span></code></a></dt>
+<dd>represents the objectives of a multi-criteria optimisation problem.</dd>
+<dt><a class="reference internal" href="#polynondom.PolyNondom" title="polynondom.PolyNondom"><code class="xref py py-class docutils literal"><span class="pre">PolyNondom</span></code></a></dt>
+<dd>enumerates and visualises different sets of (non-dominated) points.</dd>
+</dl>
+<dl class="class">
+<dt id="polynondom.AssignmentDomain">
+<em class="property">class </em><code class="descclassname">polynondom.</code><code class="descname">AssignmentDomain</code><span class="sig-paren">(</span><em>agents</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#AssignmentDomain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.AssignmentDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#polynondom.GenericDomain" title="polynondom.GenericDomain"><code class="xref py py-class docutils literal"><span class="pre">polynondom.GenericDomain</span></code></a></p>
+<p>Feasible domain of an assignment problem.</p>
+<p>The assignment problem has a number of agents and a(n equal) number 
+of tasks. Any agent can be assigned to perform any task. A feasible 
+solution is given by an assignment of agents to tasks in such a way 
+that each agent is one task and all tasks are assigned by exactly 
+by one agent.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>num_agents</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#int" title="(in Python v3.5)"><em>int</em></a>) &#8211; Number of agents of corresponding assignment problem</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body">ad = AssignmentDomain(4)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="polynondom.CubeDomain">
+<em class="property">class </em><code class="descclassname">polynondom.</code><code class="descname">CubeDomain</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#CubeDomain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.CubeDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#polynondom.GenericDomain" title="polynondom.GenericDomain"><code class="xref py py-class docutils literal"><span class="pre">polynondom.GenericDomain</span></code></a></p>
+<p>Feasible domain given by the vertices of an n-dimensional standard cube.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body">cd = CubeDomain(3)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="exception">
+<dt id="polynondom.Error">
+<em class="property">exception </em><code class="descclassname">polynondom.</code><code class="descname">Error</code><a class="reference internal" href="_modules/polynondom.html#Error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.5/library/exceptions.html#Exception" title="(in Python v3.5)"><code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></a></p>
+<p>Base class for exceptions.</p>
+<dl class="method">
+<dt id="polynondom.Error.with_traceback">
+<code class="descname">with_traceback</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#polynondom.Error.with_traceback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception.with_traceback(tb) &#8211;
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="polynondom.ExplicitDomain">
+<em class="property">class </em><code class="descclassname">polynondom.</code><code class="descname">ExplicitDomain</code><span class="sig-paren">(</span><em>dim</em>, <em>domain</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#ExplicitDomain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.ExplicitDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#polynondom.GenericDomain" title="polynondom.GenericDomain"><code class="xref py py-class docutils literal"><span class="pre">polynondom.GenericDomain</span></code></a></p>
+<p>Explicitely given feasible domain.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>domain</strong> (<em>Iterable</em>) &#8211; Feasible domain</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body">ed = ExplicitDomain(3, some_iterable)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="polynondom.GenericDomain">
+<em class="property">class </em><code class="descclassname">polynondom.</code><code class="descname">GenericDomain</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#GenericDomain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.GenericDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.5/library/functions.html#object" title="(in Python v3.5)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Feasible domain of a generic optimisation problem.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>dim</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#int" title="(in Python v3.5)"><em>int</em></a>) &#8211; Dimension of feasible domain</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Do not use this class directly.</p>
+</div>
+</dd></dl>
+
+<dl class="exception">
+<dt id="polynondom.InfeasibleBoxError">
+<em class="property">exception </em><code class="descclassname">polynondom.</code><code class="descname">InfeasibleBoxError</code><a class="reference internal" href="_modules/polynondom.html#InfeasibleBoxError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.InfeasibleBoxError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#polynondom.Error" title="polynondom.Error"><code class="xref py py-class docutils literal"><span class="pre">polynondom.Error</span></code></a></p>
+<p>Rectangular box is infeasible.</p>
+<dl class="method">
+<dt id="polynondom.InfeasibleBoxError.with_traceback">
+<code class="descname">with_traceback</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#polynondom.InfeasibleBoxError.with_traceback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception.with_traceback(tb) &#8211;
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="polynondom.Objectives">
+<em class="property">class </em><code class="descclassname">polynondom.</code><code class="descname">Objectives</code><a class="reference internal" href="_modules/polynondom.html#Objectives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.Objectives" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.5/library/functions.html#object" title="(in Python v3.5)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Represents the objectives of a multi-criteria optimisation problem.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>objectives</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><em>list</em></a>) &#8211; Objective functions</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="polynondom.Objectives.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>sol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#Objectives.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.Objectives.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Point in objective space corresponding to given solution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sol</strong> (<em>Iterable</em>) &#8211; Feasible solution</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Image in objective space</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#tuple" title="(in Python v3.5)">tuple</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="polynondom.Objectives.obj">
+<code class="descname">obj</code><a class="headerlink" href="#polynondom.Objectives.obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Objective functions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Getter:</th><td class="field-body">Returns objectives as list of tuples</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Setter:</th><td class="field-body">Appends objective (given by an Iterable) to list</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body">mult_crit.obj = [3, 2, -1] where mult_crit = Objectives()</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="polynondom.Objectives.read">
+<em class="property">classmethod </em><code class="descname">read</code><span class="sig-paren">(</span><em>file</em>, <em>*</em>, <em>delimiter=' '</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#Objectives.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.Objectives.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read objectives given via file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; File(name) containing objectives</li>
+<li><strong>delimiter</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; Delimiter (Defaults to &#8216; &#8216;)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#polynondom.Objectives" title="polynondom.Objectives"><code class="xref py py-class docutils literal"><span class="pre">Objectives</span></code></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first simple">
+<li><a class="reference external" href="https://docs.python.org/3.5/library/exceptions.html#FileNotFoundError" title="(in Python v3.5)"><strong>FileNotFoundError</strong></a> &#8211; if file cannot be found</li>
+<li><a class="reference external" href="https://docs.python.org/3.5/library/exceptions.html#PermissionError" title="(in Python v3.5)"><strong>PermissionError</strong></a> &#8211; if file cannot be opened</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"><p class="first last">obj = Objectives.read(filename, delimiter=&#8217;,&#8217;) where                         filename corresponds to the location of the input file</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="polynondom.Points">
+<em class="property">class </em><code class="descclassname">polynondom.</code><code class="descname">Points</code><span class="sig-paren">(</span><em>identifier</em>, <em>color</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#Points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.Points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.5/library/functions.html#object" title="(in Python v3.5)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Represents certain set of points in objective space.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>_id</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; Identifier for points</li>
+<li><strong>_color</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; Color used for visualisation of points</li>
+<li><strong>_visualised_items</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><em>list</em></a>) &#8211; Container for visualised items</li>
+<li><strong>points</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#set" title="(in Python v3.5)"><em>set</em></a>) &#8211; Container for points</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="polynondom.Points.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#Points.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.Points.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add item to points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#tuple" title="(in Python v3.5)"><em>tuple</em></a>) &#8211; Point belonging to point set</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="polynondom.Points.add_visualised_items">
+<code class="descname">add_visualised_items</code><span class="sig-paren">(</span><em>items</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#Points.add_visualised_items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.Points.add_visualised_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add items to container storing visualised objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>items</strong> (<a class="reference external" href="http://matplotlib.sourceforge.net/api/collections_api.html#matplotlib.collections.PathCollection" title="(in Matplotlib v2.0.2)"><code class="xref py py-class docutils literal"><span class="pre">matplotlib.collections.PathCollection</span></code></a>) &#8211; Visualised items</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="polynondom.Points.remove_visualised_items">
+<code class="descname">remove_visualised_items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#Points.remove_visualised_items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.Points.remove_visualised_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all visualised items from matplotlib figure.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="polynondom.Points.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>items</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#Points.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.Points.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add items to points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>items</strong> (<em>iterable</em>) &#8211; Points belonging to point set</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="polynondom.PolyNondom">
+<em class="property">class </em><code class="descclassname">polynondom.</code><code class="descname">PolyNondom</code><a class="reference internal" href="_modules/polynondom.html#PolyNondom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.PolyNondom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.5/library/functions.html#object" title="(in Python v3.5)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Enumerates and visualises different sets of (non-dominated) points.</p>
+<dl class="glossary docutils">
+</dl>
+<dl class="docutils">
+<dt>non-dominated point</dt>
+<dd>A point <em>y</em> is non-dominated (in the point set P) if there is no other 
+point <em>z</em> in P such that <em>z_i &lt;= y_i</em> for all i with at least one 
+strict inequality.</dd>
+<dt>dominated point</dt>
+<dd>A point is <em>y</em> is dominated if <em>y</em> is not non-dominated.</dd>
+<dt>polynon-dominated point</dt>
+<dd>A non-dominated point <em>y</em> is polynon-dominated (w.r.t. the underlying multi-objective problem)
+if the projection of the point is also non-dominated for the given multi-objective problem where
+one of the objectives was neglected</dd>
+<dt>mononon-dominated point</dt>
+<dd>A non-dominated point <em>y</em> is mononon-dominated if <em>y</em> is not 
+polynon-dominated.</dd>
+</dl>
+<p>See also the <a class="reference external" href="https://opus4.kobv.de/opus4-zib/files/6128/report_16-55.pdf">mathematical definitions</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>_dim</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#int" title="(in Python v3.5)"><em>int</em></a>) &#8211; Dimension of objective space</li>
+<li><strong>_fig</strong> (<em>Figure</em>) &#8211; Figure object of matplotlib</li>
+<li><strong>_ax</strong> (<em>Axes</em>) &#8211; Axes object of matplotlib</li>
+<li><strong>_message</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; Info message</li>
+<li><strong>points</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#dict" title="(in Python v3.5)"><em>dict</em></a>) &#8211; Maps indentifier to <a class="reference internal" href="#polynondom.Points" title="polynondom.Points"><code class="xref py py-class docutils literal"><span class="pre">Points</span></code></a></li>
+<li><strong>obj_to_polynd_points</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><em>list</em></a>) &#8211; maps objective to polynon-dominated points</li>
+<li><strong>polynd_boxes</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><em>list</em></a>) &#8211; Container for feasible boxes given by           polynon-dominated points</li>
+<li><strong>_ax_limits</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#dict" title="(in Python v3.5)"><em>dict</em></a>) &#8211; Maps coordinate axes to axes limits used in visualisation</li>
+<li><strong>_ax_setter</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#dict" title="(in Python v3.5)"><em>dict</em></a>) &#8211; Maps coordinate axes to matplotlib functions used for           setting axes limits</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="polynondom.PolyNondom.clear_visualisation">
+<code class="descname">clear_visualisation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#PolyNondom.clear_visualisation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.PolyNondom.clear_visualisation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear current visualisation.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="polynondom.PolyNondom.compute_points">
+<em class="property">classmethod </em><code class="descname">compute_points</code><span class="sig-paren">(</span><em>domain</em>, <em>objectives</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#PolyNondom.compute_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.PolyNondom.compute_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes points sets based on given feasible domain and objectives.</p>
+<p>Computes dominated, non-dominated, polynon-dominated and 
+mononon-dominated points in objective space based on given domain 
+and objectives.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>domain</strong> (<a class="reference internal" href="#polynondom.GenericDomain" title="polynondom.GenericDomain"><em>GenericDomain</em></a>) &#8211; Feasible domain</li>
+<li><strong>objectives</strong> (<a class="reference internal" href="#polynondom.Objectives" title="polynondom.Objectives"><em>Objectives</em></a>) &#8211; Objective functions</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#polynondom.PolyNondom" title="polynondom.PolyNondom"><code class="xref py py-class docutils literal"><span class="pre">PolyNondom</span></code></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last">ins = PolyNondom.compute_points(feas_dom, mult_crit) where                   feas_dom corresponds to <a class="reference internal" href="#polynondom.GenericDomain" title="polynondom.GenericDomain"><code class="xref py py-class docutils literal"><span class="pre">GenericDomain</span></code></a> and                   mult_crit corresponds to <a class="reference internal" href="#polynondom.Objectives" title="polynondom.Objectives"><code class="xref py py-class docutils literal"><span class="pre">Objectives</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="polynondom.PolyNondom.read_points">
+<em class="property">classmethod </em><code class="descname">read_points</code><span class="sig-paren">(</span><em>file</em>, <em>*</em>, <em>delimiter=' '</em>, <em>all_nondom=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#PolyNondom.read_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.PolyNondom.read_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read points given via file.</p>
+<p>Reads all points given via file, computes dominated, non-dominated,
+polynon-dominated and mononon-dominated points and returns 
+corresponding instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; File(name) containing points in objective space</li>
+<li><strong>delimiter</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; Delimiter for point coordinates (Defaults to &#8216; &#8216;)</li>
+<li><strong>all_nondom</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#bool" title="(in Python v3.5)"><em>bool</em></a>) &#8211; Specifier for all given points are          non-dominated (Defaults to False)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#polynondom.PolyNondom" title="polynondom.PolyNondom"><code class="xref py py-class docutils literal"><span class="pre">PolyNondom</span></code></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first simple">
+<li><a class="reference external" href="https://docs.python.org/3.5/library/exceptions.html#FileNotFoundError" title="(in Python v3.5)"><strong>FileNotFoundError</strong></a> &#8211; if file cannot be found</li>
+<li><a class="reference external" href="https://docs.python.org/3.5/library/exceptions.html#PermissionError" title="(in Python v3.5)"><strong>PermissionError</strong></a> &#8211; if file cannot be opened</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"><p class="first last">ins = PolyNondom.read_points(filename, delimiter=&#8217;,&#8217;) where                         filename corresponds to the location of the input file</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="polynondom.PolyNondom.visualise">
+<code class="descname">visualise</code><span class="sig-paren">(</span><em>id</em>, <em>*</em>, <em>my_color=None</em>, <em>my_width=0.8</em>, <em>my_style='--'</em>, <em>my_marker='o'</em>, <em>my_marker_size=40</em>, <em>with_lines=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#PolyNondom.visualise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.PolyNondom.visualise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualises point sets corresponding to id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>id</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; identifier corresponding to (combinations of)                        &#8216;d&#8217;ominated, &#8216;n&#8217;on-dominated, &#8216;p&#8217;olynon-dominated,                        &#8216;m&#8217;ononon-dominated points</li>
+<li><strong>my_color</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; color to use for visualisation (Defaults are                              dominated points - black,                             non-domintated points - blue,
+polynon-dominated points - green,                             mononon-dominated points - brown</li>
+<li><strong>my_width</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#float" title="(in Python v3.5)"><em>float</em></a>) &#8211; width of lines (Default is 0.8)</li>
+<li><strong>my_style</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; style used for lines (Default is &#8216;&#8211;&#8217;)</li>
+<li><strong>my_marker</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; marker used for points (Default is &#8216;o&#8217;)</li>
+<li><strong>my_marker_size</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#int" title="(in Python v3.5)"><em>int</em></a>) &#8211; size used for marker (Default is 40)</li>
+<li><strong>with_lines</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#bool" title="(in Python v3.5)"><em>bool</em></a>) &#8211; Specifier if lines should be visualised                                 in the 3d case (Default is True)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"><p class="first last">ins.visualise(&#8216;dp&#8217;, my_color=&#8217;blue&#8217;)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="polynondom.PolyNondom.visualise_box">
+<code class="descname">visualise_box</code><span class="sig-paren">(</span><em>interval1</em>, <em>interval2</em>, <em>interval3=None</em>, <em>*</em>, <em>my_face_color='blue'</em>, <em>my_alpha=0.2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#PolyNondom.visualise_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.PolyNondom.visualise_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualises given rectangular box.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>interval1</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#tuple" title="(in Python v3.5)"><em>tuple</em></a>) &#8211; first interval in Cartesian product                                 corresponding to box</li>
+<li><strong>interval2</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#tuple" title="(in Python v3.5)"><em>tuple</em></a>) &#8211; second interval in Cartesian product                                 corresponding to box</li>
+<li><strong>interval3</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#tuple" title="(in Python v3.5)"><em>tuple</em></a>) &#8211; (in 3d case) third interval in Cartesian                                 product corresponding to box</li>
+<li><strong>my_face_color</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) &#8211; color used to visualise faces of box                                   (Default is blue)</li>
+<li><strong>my_alpha</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#float" title="(in Python v3.5)"><em>float</em></a>) &#8211; alpha value used for coloring faces</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"><p class="first last">ins.visualise_box((3, 4), (5, 7), (3, 5), my_face_color=&#8217;red&#8217;)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Adjust size of figure to include box in any case.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="polynondom.PolyNondom.visualise_polynd_boxes">
+<code class="descname">visualise_polynd_boxes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#PolyNondom.visualise_polynd_boxes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.PolyNondom.visualise_polynd_boxes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualises all feasible boxes given by polynon-dominated points.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="polynondom.get_cmd_line_parser">
+<code class="descclassname">polynondom.</code><code class="descname">get_cmd_line_parser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/polynondom.html#get_cmd_line_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#polynondom.get_cmd_line_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Command line interface.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="glossary.html" class="btn btn-neutral float-right" title="Glossary" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cmd.html" class="btn btn-neutral" title="Command Line Interface" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Sebastian Schenker.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

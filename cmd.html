@@ -1,0 +1,343 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Command Line Interface &mdash; PolyNondom 0.9 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="PolyNondom 0.9 documentation" href="index.html"/>
+        <link rel="next" title="Module documentation" href="polynondom.html"/>
+        <link rel="prev" title="Basic usage" href="basic_usage.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PolyNondom
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basic_usage.html">Basic usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Command Line Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#polynondom-py">polynondom.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#polynondom-py-objs">polynondom.py objs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#polynondom-py-points">polynondom.py points</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="polynondom.html">Module documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">PolyNondom</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Command Line Interface</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/cmd.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="command-line-interface">
+<h1>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Not all features are available
+through the command line interface.</p>
+</div>
+<div class="section" id="polynondom-py">
+<h2>polynondom.py<a class="headerlink" href="#polynondom-py" title="Permalink to this headline">¶</a></h2>
+<p>Enumerates and visualises different                                          sets of non-dominated points</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">usage: polynondom.py [-h] {points,objs} ...</span>
+</pre></div>
+</div>
+<dl class="option">
+<dt id="cmdoption-polynondom.py-h">
+<span id="cmdoption-polynondom.py--help"></span><code class="descname">-h</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--help</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-polynondom.py-h" title="Permalink to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<div class="section" id="polynondom-py-objs">
+<h3>polynondom.py objs<a class="headerlink" href="#polynondom-py-objs" title="Permalink to this headline">¶</a></h3>
+<p>Read objectives given in input file.</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">usage: polynondom.py objs [-h] -f input_file [--delim delimiter]</span>
+<span class="go">                              [-v {d,n,m,p} [{d,n,m,p} ...]]</span>
+<span class="go">                              [-c {red,blue,black,brown,green}] [--noLines]</span>
+<span class="go">                              (--assignment | --cube)</span>
+</pre></div>
+</div>
+<dl class="option">
+<dt id="cmdoption-polynondom.py-objs-h">
+<span id="cmdoption-polynondom.py-objs--help"></span><code class="descname">-h</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--help</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-polynondom.py-objs-h" title="Permalink to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-objs-f">
+<span id="cmdoption-polynondom.py-objs--file"></span><code class="descname">-f</code><code class="descclassname"> &lt;input_file&gt;</code><code class="descclassname">, </code><code class="descname">--file</code><code class="descclassname"> &lt;input_file&gt;</code><a class="headerlink" href="#cmdoption-polynondom.py-objs-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Each line in the input file is assumed to contain                                      an opening bracket [ and a closing bracket ] which                                      contain the input values.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-objs--delim">
+<code class="descname">--delim</code><code class="descclassname"> &lt;delimiter&gt;</code><a class="headerlink" href="#cmdoption-polynondom.py-objs--delim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delimiter used to delimited the input values within                                      the brackets (defaults to space).</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-objs-v">
+<span id="cmdoption-polynondom.py-objs--visualise"></span><code class="descname">-v</code><code class="descclassname"> {d,n,m,p}</code><code class="descclassname">, </code><code class="descname">--visualise</code><code class="descclassname"> {d,n,m,p}</code><a class="headerlink" href="#cmdoption-polynondom.py-objs-v" title="Permalink to this definition">¶</a></dt>
+<dd><p>specify which points to visualise: (d)ominated,                               (n)on-dominated, (p)olynon-dominated,                               (m)ononon-dominated</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-objs-c">
+<span id="cmdoption-polynondom.py-objs--color"></span><code class="descname">-c</code><code class="descclassname"> {red,blue,black,brown,green}</code><code class="descclassname">, </code><code class="descname">--color</code><code class="descclassname"> {red,blue,black,brown,green}</code><a class="headerlink" href="#cmdoption-polynondom.py-objs-c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Color used for point visualisation</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-objs--noLines">
+<code class="descname">--noLines</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-polynondom.py-objs--noLines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify that line projections of points should not be                                      displayed. This might improve the general overview in                                      3d visualisation if many points are involved.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-objs--assignment">
+<code class="descname">--assignment</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-polynondom.py-objs--assignment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify that corresponding domain is an assignment problem.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-objs--cube">
+<code class="descname">--cube</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-polynondom.py-objs--cube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify that corresponding domain are the vertices of a cube.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="polynondom-py-points">
+<h3>polynondom.py points<a class="headerlink" href="#polynondom-py-points" title="Permalink to this headline">¶</a></h3>
+<p>Read pre-computed points given in input file.</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">usage: polynondom.py points [-h] -f input_file [--delim delimiter]</span>
+<span class="go">                                [-v {d,n,m,p} [{d,n,m,p} ...]]</span>
+<span class="go">                                [-c {red,blue,black,brown,green}] [--noLines]</span>
+<span class="go">                                [--allNondom]</span>
+</pre></div>
+</div>
+<dl class="option">
+<dt id="cmdoption-polynondom.py-points-h">
+<span id="cmdoption-polynondom.py-points--help"></span><code class="descname">-h</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--help</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-polynondom.py-points-h" title="Permalink to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-points-f">
+<span id="cmdoption-polynondom.py-points--file"></span><code class="descname">-f</code><code class="descclassname"> &lt;input_file&gt;</code><code class="descclassname">, </code><code class="descname">--file</code><code class="descclassname"> &lt;input_file&gt;</code><a class="headerlink" href="#cmdoption-polynondom.py-points-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Each line in the input file is assumed to contain                                      an opening bracket [ and a closing bracket ] which                                      contain the input values.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-points--delim">
+<code class="descname">--delim</code><code class="descclassname"> &lt;delimiter&gt;</code><a class="headerlink" href="#cmdoption-polynondom.py-points--delim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delimiter used to delimited the input values within                                      the brackets (defaults to space).</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-points-v">
+<span id="cmdoption-polynondom.py-points--visualise"></span><code class="descname">-v</code><code class="descclassname"> {d,n,m,p}</code><code class="descclassname">, </code><code class="descname">--visualise</code><code class="descclassname"> {d,n,m,p}</code><a class="headerlink" href="#cmdoption-polynondom.py-points-v" title="Permalink to this definition">¶</a></dt>
+<dd><p>specify which points to visualise: (d)ominated,                               (n)on-dominated, (p)olynon-dominated,                               (m)ononon-dominated</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-points-c">
+<span id="cmdoption-polynondom.py-points--color"></span><code class="descname">-c</code><code class="descclassname"> {red,blue,black,brown,green}</code><code class="descclassname">, </code><code class="descname">--color</code><code class="descclassname"> {red,blue,black,brown,green}</code><a class="headerlink" href="#cmdoption-polynondom.py-points-c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Color used for point visualisation</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-points--noLines">
+<code class="descname">--noLines</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-polynondom.py-points--noLines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify that line projections of points should not be                                      displayed. This might improve the general overview in                                      3d visualisation if many points are involved.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-polynondom.py-points--allNondom">
+<code class="descname">--allNondom</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-polynondom.py-points--allNondom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switch to indicate that all pre-computed points are known                                    to be non-dominated (defaults to False)</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="polynondom.html" class="btn btn-neutral float-right" title="Module documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="basic_usage.html" class="btn btn-neutral" title="Basic usage" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Sebastian Schenker.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

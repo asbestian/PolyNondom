@@ -1,0 +1,988 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>polynondom &mdash; PolyNondom 0.9 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="PolyNondom 0.9 documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PolyNondom
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basic_usage.html">Basic usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cmd.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../polynondom.html">Module documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">PolyNondom</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      
+    <li>polynondom</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for polynondom</h1><div class="highlight"><pre>
+<span class="ch">#!/usr/bin/env python3</span>
+
+<span class="sd">&quot;&quot;&quot;Module for enumerating and visualising non-dominated points.</span>
+
+<span class="sd">This module comprises classes for different feasible domains, a class for</span>
+<span class="sd">multiple objectives and a class for enumerating and visualising </span>
+<span class="sd">different subsets of (non-dominated) points.</span>
+
+<span class="sd">Available classes</span>
+<span class="sd">-----------------</span>
+
+<span class="sd">:class:`GenericDomain`</span>
+<span class="sd">   represents the feasible domain of a(n abstract) generic optimisation problem.</span>
+
+<span class="sd">:class:`AssignmentDomain`</span>
+<span class="sd">   represents the feasible domain of an assignment problem.</span>
+
+<span class="sd">:class:`CubeDomain`</span>
+<span class="sd">   represents the feasible domain given by the vertices of a standard cube.</span>
+
+<span class="sd">:class:`ExplicitDomain`</span>
+<span class="sd">   represents the feasible domain given by an explicitly given set of feasible solutions.</span>
+
+<span class="sd">:class:`Objectives`</span>
+<span class="sd">   represents the objectives of a multi-criteria optimisation problem.</span>
+
+<span class="sd">:class:`PolyNondom`</span>
+<span class="sd">   enumerates and visualises different sets of (non-dominated) points.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span><span class="p">,</span> <span class="n">permutations</span><span class="p">,</span> <span class="n">product</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">dot</span><span class="p">,</span> <span class="n">linspace</span><span class="p">,</span> <span class="n">meshgrid</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">axes3d</span>
+
+<div class="viewcode-block" id="Error"><a class="viewcode-back" href="../polynondom.html#polynondom.Error">[docs]</a><span class="k">class</span> <span class="nc">Error</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for exceptions.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="InfeasibleBoxError"><a class="viewcode-back" href="../polynondom.html#polynondom.InfeasibleBoxError">[docs]</a><span class="k">class</span> <span class="nc">InfeasibleBoxError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rectangular box is infeasible.&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="GenericDomain"><a class="viewcode-back" href="../polynondom.html#polynondom.GenericDomain">[docs]</a><span class="k">class</span> <span class="nc">GenericDomain</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Feasible domain of a generic optimisation problem.</span>
+<span class="sd">     </span>
+<span class="sd">    :ivar int dim: Dimension of feasible domain</span>
+<span class="sd">    </span>
+<span class="sd">    .. note:: Do not use this class directly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialises generic domain.</span>
+<span class="sd">        </span>
+<span class="sd">        :param: int dim: Dimension of feasible domain</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="n">dim</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterator for generic domain.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;String representation of domain.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="AssignmentDomain"><a class="viewcode-back" href="../polynondom.html#polynondom.AssignmentDomain">[docs]</a><span class="k">class</span> <span class="nc">AssignmentDomain</span><span class="p">(</span><span class="n">GenericDomain</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Feasible domain of an assignment problem.</span>
+<span class="sd">    </span>
+<span class="sd">    The assignment problem has a number of agents and a(n equal) number </span>
+<span class="sd">    of tasks. Any agent can be assigned to perform any task. A feasible </span>
+<span class="sd">    solution is given by an assignment of agents to tasks in such a way </span>
+<span class="sd">    that each agent is one task and all tasks are assigned by exactly </span>
+<span class="sd">    by one agent.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar int num_agents: Number of agents of corresponding assignment problem</span>
+
+<span class="sd">    :Example: ad = AssignmentDomain(4)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agents</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialises assignment domain.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">agents</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span> <span class="o">=</span> <span class="n">agents</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterator for assignment domain.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">permutations</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span><span class="p">))):</span>
+            <span class="n">feas_sol</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">perm</span><span class="p">):</span>
+                <span class="n">feas_sol</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span> <span class="o">+</span> <span class="n">val</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">feas_sol</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CubeDomain"><a class="viewcode-back" href="../polynondom.html#polynondom.CubeDomain">[docs]</a><span class="k">class</span> <span class="nc">CubeDomain</span><span class="p">(</span><span class="n">GenericDomain</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Feasible domain given by the vertices of an n-dimensional standard cube.</span>
+<span class="sd">    </span>
+<span class="sd">    :Example: cd = CubeDomain(3)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialises feasible domain given by standard cube.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterator for cube domain.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">prod</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">prod</span></div>
+
+
+<div class="viewcode-block" id="ExplicitDomain"><a class="viewcode-back" href="../polynondom.html#polynondom.ExplicitDomain">[docs]</a><span class="k">class</span> <span class="nc">ExplicitDomain</span><span class="p">(</span><span class="n">GenericDomain</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Explicitely given feasible domain.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar Iterable domain: Feasible domain</span>
+<span class="sd">    </span>
+<span class="sd">    :Example: ed = ExplicitDomain(3, some_iterable)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">domain</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialises feasible domain via given domain.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterator for feasible domain.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">sol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sol</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">sol</span></div>
+
+
+<div class="viewcode-block" id="Objectives"><a class="viewcode-back" href="../polynondom.html#polynondom.Objectives">[docs]</a><span class="k">class</span> <span class="nc">Objectives</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Represents the objectives of a multi-criteria optimisation problem.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar list objectives: Objective functions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise with no objectives.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Objective functions</span>
+
+<span class="sd">        :getter: Returns objectives as list of tuples</span>
+<span class="sd">        :setter: Appends objective (given by an Iterable) to list</span>
+<span class="sd">        </span>
+<span class="sd">        :Example: mult_crit.obj = [3, 2, -1] where mult_crit = Objectives()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span>
+
+    <span class="nd">@obj.setter</span>
+    <span class="k">def</span> <span class="nf">obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objective</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">objective</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Objectives.__call__"><a class="viewcode-back" href="../polynondom.html#polynondom.Objectives.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sol</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Point in objective space corresponding to given solution.</span>
+
+<span class="sd">        :param Iterable sol: Feasible solution</span>
+<span class="sd">        :return: Image in objective space</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">dot</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="n">array</span><span class="p">(</span><span class="n">sol</span><span class="p">))</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="p">])</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;String representation of objectives.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;obj_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">obj</span>
+                          <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objectives</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Objectives.read"><a class="viewcode-back" href="../polynondom.html#polynondom.Objectives.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read objectives given via file.</span>
+
+<span class="sd">        :param str file: File(name) containing objectives</span>
+<span class="sd">        :param str delimiter: Delimiter (Defaults to &#39; &#39;)</span>
+<span class="sd">        :rtype: :class:`Objectives`</span>
+<span class="sd">        :raises FileNotFoundError: if file cannot be found</span>
+<span class="sd">        :raise PermissionError: if file cannot be opened</span>
+
+<span class="sd">        :Example: obj = Objectives.read(filename, delimiter=&#39;,&#39;) where \</span>
+<span class="sd">                        filename corresponds to the location of the input file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="n">ins</span> <span class="o">=</span> <span class="n">cls</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="p">:</span>
+                    <span class="n">bracket_open</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
+                    <span class="n">bracket_close</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">bracket_open</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">bracket_close</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">substring</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">bracket_open</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">bracket_close</span><span class="p">]</span>
+                        <span class="n">ins</span><span class="o">.</span><span class="n">_objectives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span> <span class="k">else</span> <span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">substring</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="n">delimiter</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="p">))))</span>
+        <span class="k">except</span> <span class="n">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;File not found.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">PermissionError</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Lacking permissions to open file.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ins</span></div></div>
+
+<div class="viewcode-block" id="Points"><a class="viewcode-back" href="../polynondom.html#polynondom.Points">[docs]</a><span class="k">class</span> <span class="nc">Points</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Represents certain set of points in objective space.</span>
+
+<span class="sd">    :ivar str _id: Identifier for points</span>
+<span class="sd">    :ivar str _color: Color used for visualisation of points</span>
+<span class="sd">    :ivar list _visualised_items: Container for visualised items</span>
+<span class="sd">    :ivar set points: Container for points</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialises points and visualisation related items.</span>
+
+<span class="sd">        :param str identifier: Identifier corresponding to point set</span>
+<span class="sd">        :param str color: Color used for visualisation point set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_color</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_visualised_items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterator for points.&quot;&quot;&quot;</span>
+        <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns readable representation of points.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Points.add"><a class="viewcode-back" href="../polynondom.html#polynondom.Points.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add item to points.</span>
+
+<span class="sd">        :param tuple item: Point belonging to point set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Points.update"><a class="viewcode-back" href="../polynondom.html#polynondom.Points.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add items to points.</span>
+
+<span class="sd">        :param iterable items: Points belonging to point set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Points.add_visualised_items"><a class="viewcode-back" href="../polynondom.html#polynondom.Points.add_visualised_items">[docs]</a>    <span class="k">def</span> <span class="nf">add_visualised_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add items to container storing visualised objects.</span>
+
+<span class="sd">        :param items: Visualised items</span>
+<span class="sd">        :type items: :class:`matplotlib.collections.PathCollection`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_visualised_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Points.remove_visualised_items"><a class="viewcode-back" href="../polynondom.html#polynondom.Points.remove_visualised_items">[docs]</a>    <span class="k">def</span> <span class="nf">remove_visualised_items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove all visualised items from matplotlib figure.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visualised_items</span><span class="p">:</span>
+            <span class="n">elem</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_visualised_items</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_visualised</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visualised_items</span> <span class="o">!=</span> <span class="p">[]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+
+    <span class="nd">@id.setter</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">identifier</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color</span>
+
+    <span class="nd">@color.setter</span>
+    <span class="k">def</span> <span class="nf">color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_color</span> <span class="o">=</span> <span class="n">color</span></div>
+
+<div class="viewcode-block" id="PolyNondom"><a class="viewcode-back" href="../polynondom.html#polynondom.PolyNondom">[docs]</a><span class="k">class</span> <span class="nc">PolyNondom</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Enumerates and visualises different sets of (non-dominated) points.</span>
+<span class="sd">    </span>
+<span class="sd">    .. glossary::</span>
+<span class="sd">    </span>
+<span class="sd">    non-dominated point</span>
+<span class="sd">       A point *y* is non-dominated (in the point set P) if there is no other </span>
+<span class="sd">       point *z* in P such that *z_i &lt;= y_i* for all i with at least one </span>
+<span class="sd">       strict inequality.</span>
+<span class="sd">    </span>
+<span class="sd">    dominated point</span>
+<span class="sd">       A point is *y* is dominated if *y* is not non-dominated.</span>
+<span class="sd">        </span>
+<span class="sd">    polynon-dominated point</span>
+<span class="sd">       A non-dominated point *y* is polynon-dominated (w.r.t. the underlying multi-objective problem)</span>
+<span class="sd">       if the projection of the point is also non-dominated for the given multi-objective problem where</span>
+<span class="sd">       one of the objectives was neglected</span>
+
+<span class="sd">    mononon-dominated point</span>
+<span class="sd">       A non-dominated point *y* is mononon-dominated if *y* is not </span>
+<span class="sd">       polynon-dominated.</span>
+<span class="sd">        </span>
+<span class="sd">    See also the `mathematical definitions &lt;https://opus4.kobv.de/opus4-zib/files/6128/report_16-55.pdf&gt;`_</span>
+
+<span class="sd">    :ivar int _dim: Dimension of objective space</span>
+<span class="sd">    :ivar Figure _fig: Figure object of matplotlib</span>
+<span class="sd">    :ivar Axes _ax: Axes object of matplotlib</span>
+<span class="sd">    :ivar str _message: Info message</span>
+<span class="sd">    :ivar dict points: Maps indentifier to :class:`Points`</span>
+<span class="sd">    :ivar list obj_to_polynd_points: maps objective to polynon-dominated points</span>
+<span class="sd">    :ivar list polynd_boxes: Container for feasible boxes given by \</span>
+<span class="sd">          polynon-dominated points</span>
+<span class="sd">    :ivar dict _ax_limits: Maps coordinate axes to axes limits used in visualisation</span>
+<span class="sd">    :ivar dict _ax_setter: Maps coordinate axes to matplotlib functions used for \</span>
+<span class="sd">          setting axes limits</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialises different point sets and visualisation related items.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_message</span> <span class="o">=</span> <span class="s2">&quot;String combined of the following letters expected:&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="n">Points</span><span class="p">(</span><span class="s1">&#39;dominated&#39;</span><span class="p">,</span> <span class="s1">&#39;black&#39;</span><span class="p">),</span>
+                       <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="n">Points</span><span class="p">(</span><span class="s1">&#39;non-dominated&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">),</span>
+                       <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="n">Points</span><span class="p">(</span><span class="s1">&#39;polynon-dominated&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">),</span>
+                       <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="n">Points</span><span class="p">(</span><span class="s1">&#39;mononon-dominated&#39;</span><span class="p">,</span> <span class="s1">&#39;brown&#39;</span><span class="p">)}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj_to_polynd_points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polynd_boxes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                           <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                           <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax_setter</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_xlim3d</span><span class="p">,</span>
+                           <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_ylim3d</span><span class="p">,</span>
+                           <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_zlim3d</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns readable representation of different point sets.&quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="s2">&quot;Points:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="n">subset</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_generate_all_feasible_points</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">objectives</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generator for feasible points in objective space.</span>
+<span class="sd">        </span>
+<span class="sd">        :param iterable domain: Feasible domain</span>
+<span class="sd">        :param `Objectives` objectives: Multiple objectives</span>
+<span class="sd">        :return: Image in objective space</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objectives</span><span class="p">,</span> <span class="n">Objectives</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sol</span> <span class="ow">in</span> <span class="n">domain</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">objectives</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_is_dominated</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">except_obj_index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Checks whether r is dominated by s.</span>
+<span class="sd">        </span>
+<span class="sd">        :param tuple r: feasible point</span>
+<span class="sd">        :param tuple s: feasible point</span>
+<span class="sd">        :param int except_obj_index: index to neglect (Default is None.) </span>
+<span class="sd">        :return: True if r is dominated by s; false, otherwise.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        </span>
+<span class="sd">        .. note::</span>
+<span class="sd">           Dominance relation is based on minimisation. The objective </span>
+<span class="sd">           corresponding to `except_obj_index` is neglected in the dominance</span>
+<span class="sd">           check.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">strict_less</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">elem_r</span><span class="p">,</span> <span class="n">elem_s</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">s</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">except_obj_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">index</span> <span class="o">==</span> <span class="n">except_obj_index</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">elem_s</span> <span class="o">&gt;</span> <span class="n">elem_r</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">elif</span> <span class="n">elem_s</span> <span class="o">&lt;</span> <span class="n">elem_r</span><span class="p">:</span>
+                <span class="n">strict_less</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">strict_less</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_is_nondominated</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">except_obj_index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Checks if point is non-dominated w.r.t. points.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">PolyNondom</span><span class="o">.</span><span class="n">_is_dominated</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">except_obj_index</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PolyNondom.compute_points"><a class="viewcode-back" href="../polynondom.html#polynondom.PolyNondom.compute_points">[docs]</a>    <span class="k">def</span> <span class="nf">compute_points</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">objectives</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes points sets based on given feasible domain and objectives.</span>
+<span class="sd">        </span>
+<span class="sd">        Computes dominated, non-dominated, polynon-dominated and </span>
+<span class="sd">        mononon-dominated points in objective space based on given domain </span>
+<span class="sd">        and objectives.</span>
+<span class="sd">        </span>
+<span class="sd">        :param `GenericDomain` domain: Feasible domain</span>
+<span class="sd">        :param `Objectives` objectives: Objective functions</span>
+<span class="sd">        :rtype: :class:`PolyNondom`</span>
+<span class="sd">        </span>
+<span class="sd">        :Example: ins = PolyNondom.compute_points(feas_dom, mult_crit) where \</span>
+<span class="sd">                  feas_dom corresponds to :class:`GenericDomain` and \</span>
+<span class="sd">                  mult_crit corresponds to :class:`Objectives`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">GenericDomain</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objectives</span><span class="p">,</span> <span class="n">Objectives</span><span class="p">)</span>
+        <span class="n">ins</span> <span class="o">=</span> <span class="n">cls</span><span class="p">()</span>
+        <span class="n">ins</span><span class="o">.</span><span class="n">_compute</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">objectives</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ins</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_read_line</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">separator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts line string to point(s).&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="n">start_ind</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">bracket_open</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="n">start_ind</span><span class="p">)</span>
+            <span class="n">bracket_close</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">,</span> <span class="n">start_ind</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">bracket_open</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">bracket_close</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">substring</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">bracket_open</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">bracket_close</span><span class="p">]</span>
+                <span class="n">start_ind</span> <span class="o">=</span> <span class="n">bracket_close</span><span class="o">+</span><span class="mi">1</span>
+                <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span>
+                                <span class="k">else</span> <span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span>
+                                         <span class="n">substring</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="n">separator</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="p">)))</span>
+                
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PolyNondom.read_points"><a class="viewcode-back" href="../polynondom.html#polynondom.PolyNondom.read_points">[docs]</a>    <span class="k">def</span> <span class="nf">read_points</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">all_nondom</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read points given via file.</span>
+<span class="sd">        </span>
+<span class="sd">        Reads all points given via file, computes dominated, non-dominated,</span>
+<span class="sd">        polynon-dominated and mononon-dominated points and returns </span>
+<span class="sd">        corresponding instance.</span>
+<span class="sd">        </span>
+<span class="sd">        :param str file: File(name) containing points in objective space</span>
+<span class="sd">        :param str delimiter: Delimiter for point coordinates (Defaults to &#39; &#39;)</span>
+<span class="sd">        :param bool all_nondom: Specifier for all given points are \</span>
+<span class="sd">         non-dominated (Defaults to False)</span>
+<span class="sd">        :rtype: :class:`PolyNondom`</span>
+<span class="sd">        :raises FileNotFoundError: if file cannot be found</span>
+<span class="sd">        :raise PermissionError: if file cannot be opened</span>
+<span class="sd">        </span>
+<span class="sd">        :Example: ins = PolyNondom.read_points(filename, delimiter=&#39;,&#39;) where \</span>
+<span class="sd">                        filename corresponds to the location of the input file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span> 
+        <span class="n">ins</span> <span class="o">=</span> <span class="n">cls</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">_read_line</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
+                        <span class="n">ins</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="k">if</span> <span class="n">all_nondom</span> <span class="k">else</span> \
+                            <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;File not found.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">PermissionError</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Lacking permissions to open file.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">all_nondom</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">points</span>
+                <span class="n">ins</span><span class="o">.</span><span class="n">_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">_is_nondominated</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+                        <span class="n">ins</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">ins</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;d&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">ins</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">points</span>
+                <span class="n">ins</span><span class="o">.</span><span class="n">_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">ins</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">])))</span>
+            <span class="n">ins</span><span class="o">.</span><span class="n">_compute_polynondom_points</span><span class="p">()</span>
+            <span class="n">ins</span><span class="o">.</span><span class="n">_compute_monodom_points</span><span class="p">()</span>
+            <span class="n">ins</span><span class="o">.</span><span class="n">_compute_boxes</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">ins</span></div>
+
+    <span class="k">def</span> <span class="nf">_compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">objectives</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes various non-dominated point sets.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">objectives</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_all_feasible_points</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">objectives</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_nondominated</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;d&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_polynondom_points</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_monodom_points</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute_boxes</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_box</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes feasible rectangular box.</span>
+
+<span class="sd">        The rectangular box is defined by </span>
+<span class="sd">        \bigtimes_i=1^k [\max_{i \in [k] \setminus \{i\}} p_i^j, p_i^i)</span>
+<span class="sd">        where k coincides with self._dim and p^j \in N_{-j}</span>
+<span class="sd">        </span>
+<span class="sd">        :param Iterable points: Box defining points</span>
+<span class="sd">        :return: Feasible box</span>
+<span class="sd">        :rtype tuple</span>
+<span class="sd">        :raises `InfeasibleBoxError`: if box is infeasible</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">points</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">points</span><span class="p">)))</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">points</span><span class="p">)):</span>
+            <span class="n">lhs</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">elem</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">if</span> <span class="n">j</span> <span class="o">!=</span> <span class="n">index</span><span class="p">])</span>
+            <span class="n">rhs</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">lhs</span> <span class="o">&lt;</span> <span class="n">rhs</span><span class="p">:</span>
+                <span class="n">box</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InfeasibleBoxError</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_compute_boxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes all feasible rect. boxes given by polynon-dom. points.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">prod</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_to_polynd_points</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_box</span><span class="p">(</span><span class="n">prod</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">InfeasibleBoxError</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Infeasible box: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">prod</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">polynd_boxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_generate_nd_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">except_obj_index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generates non-dominated points w.r.t. given points</span>
+<span class="sd">        </span>
+<span class="sd">        :param Iterable points: Feasible points in objective space</span>
+<span class="sd">        :param int except_obj_index: If given, corresp. objective is not </span>
+<span class="sd">          considered in non-dominance examination (Defaults to all objectives </span>
+<span class="sd">          are considered)</span>
+<span class="sd">        :return: non-dominated point</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_nondominated</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">except_obj_index</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">point</span>
+
+    <span class="k">def</span> <span class="nf">_compute_polynondom_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes polynon-dominated points.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">):</span>
+            <span class="n">polynd_points</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_nd_points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">index</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obj_to_polynd_points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polynd_points</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">polynd_points</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_compute_monodom_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes mononon-dominated points.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">points</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_update_ax_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update axis limits.&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]</span>
+        <span class="n">min_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span>
+        <span class="n">max_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="n">identifier</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">min_val</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="n">identifier</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="n">identifier</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_val</span>
+            <span class="k">if</span> <span class="n">max_val</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="n">identifier</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="n">identifier</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_val</span>
+
+    <span class="k">def</span> <span class="nf">_init_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise labels.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">r&#39;$c^{\top}_1 x$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">r&#39;$c^{\top}_2 x$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s1">r&#39;$c^{\top}_3 x$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_zticks</span><span class="p">([])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">w_zaxis</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_visualise_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">marker</span><span class="p">,</span> <span class="n">marker_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Visualises given points.</span>
+
+<span class="sd">        Visualises given points and saves corresponding matplotlib objects </span>
+<span class="sd">        in _visualised map.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x_coords</span><span class="p">,</span> <span class="n">y_coords</span><span class="p">,</span> <span class="o">*</span><span class="n">list_of_z_coords</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">z_coords</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">list_of_z_coords</span> <span class="k">else</span> <span class="n">list_of_z_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_ax_limits</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">x_coords</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_ax_limits</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">y_coords</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_ax_limits</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="n">z_coords</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_coords</span><span class="p">,</span> <span class="n">y_coords</span><span class="p">,</span> <span class="n">z_coords</span><span class="p">,</span> <span class="n">zdir</span><span class="o">=</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                         <span class="n">s</span><span class="o">=</span><span class="n">marker_size</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> <span class="n">depthshade</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax_setter</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">](</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax_setter</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">](</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax_setter</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">](</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_visualise_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Visualises line projections corresponding to given points.</span>
+
+<span class="sd">        Visualises line projections of given points and saves corresponding </span>
+<span class="sd">        matplotlib objects in _visualised map.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">min_x</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+        <span class="n">min_y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+        <span class="n">min_z</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax_limits</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">points</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">min_y</span><span class="p">,</span> <span class="n">y</span><span class="p">],[</span><span class="n">min_z</span><span class="p">,</span> <span class="n">min_z</span><span class="p">],</span>
+                                                               <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                                                               <span class="n">linewidth</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+                                                               <span class="n">linestyle</span><span class="o">=</span><span class="n">style</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">min_x</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="p">[</span><span class="n">min_z</span><span class="p">,</span> <span class="n">min_z</span><span class="p">],</span>
+                                                               <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                                                               <span class="n">linewidth</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+                                                               <span class="n">linestyle</span><span class="o">=</span><span class="n">style</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">],[</span><span class="n">min_z</span><span class="p">,</span> <span class="n">z</span><span class="p">],</span>
+                                                               <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                                                               <span class="n">linewidth</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+                                                               <span class="n">linestyle</span><span class="o">=</span><span class="n">style</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PolyNondom.visualise"><a class="viewcode-back" href="../polynondom.html#polynondom.PolyNondom.visualise">[docs]</a>    <span class="k">def</span> <span class="nf">visualise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">my_color</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">my_width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">my_style</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                  <span class="n">my_marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">my_marker_size</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">with_lines</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Visualises point sets corresponding to id.</span>
+<span class="sd">        </span>
+<span class="sd">        :param str id: identifier corresponding to (combinations of) \</span>
+<span class="sd">                       &#39;d&#39;ominated, &#39;n&#39;on-dominated, &#39;p&#39;olynon-dominated, \</span>
+<span class="sd">                       &#39;m&#39;ononon-dominated points</span>
+<span class="sd">        :param str my_color: color to use for visualisation (Defaults are \</span>
+<span class="sd">                             dominated points - black,\</span>
+<span class="sd">                             non-domintated points - blue,\ </span>
+<span class="sd">                             polynon-dominated points - green,\</span>
+<span class="sd">                             mononon-dominated points - brown</span>
+<span class="sd">        :param float my_width: width of lines (Default is 0.8)</span>
+<span class="sd">        :param str my_style: style used for lines (Default is &#39;--&#39;)</span>
+<span class="sd">        :param str my_marker: marker used for points (Default is &#39;o&#39;)</span>
+<span class="sd">        :param int my_marker_size: size used for marker (Default is 40)</span>
+<span class="sd">        :param bool with_lines: Specifier if lines should be visualised \</span>
+<span class="sd">                                in the 3d case (Default is True)</span>
+
+<span class="sd">        :Example: ins.visualise(&#39;dp&#39;, my_color=&#39;blue&#39;) </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Can only visualise 2- and 3-dimensional objective spaces.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="nb">any</span><span class="p">([</span><span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">id</span><span class="p">]):</span>
+            <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_message</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_labels</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">id</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="n">points</span><span class="p">:</span>
+                    <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="n">color</span> <span class="k">if</span> <span class="n">my_color</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">my_color</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_visualise_points</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">my_marker</span><span class="p">,</span>
+                                           <span class="n">marker_size</span><span class="o">=</span><span class="n">my_marker_size</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">with_lines</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_visualise_lines</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">my_width</span><span class="p">,</span>
+                                              <span class="n">style</span><span class="o">=</span><span class="n">my_style</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">save_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_name</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">azimuth</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">view_init</span><span class="p">(</span><span class="n">elevation</span><span class="p">,</span> <span class="n">azimuth</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">output_name</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PolyNondom.visualise_polynd_boxes"><a class="viewcode-back" href="../polynondom.html#polynondom.PolyNondom.visualise_polynd_boxes">[docs]</a>    <span class="k">def</span> <span class="nf">visualise_polynd_boxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Visualises all feasible boxes given by polynon-dominated points.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polynd_boxes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">visualise_box</span><span class="p">(</span><span class="o">*</span><span class="n">box</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PolyNondom.visualise_box"><a class="viewcode-back" href="../polynondom.html#polynondom.PolyNondom.visualise_box">[docs]</a>    <span class="k">def</span> <span class="nf">visualise_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval1</span><span class="p">,</span> <span class="n">interval2</span><span class="p">,</span> <span class="n">interval3</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">my_face_color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">my_alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Visualises given rectangular box.</span>
+<span class="sd">        </span>
+<span class="sd">        :param tuple interval1: first interval in Cartesian product \</span>
+<span class="sd">                                corresponding to box</span>
+<span class="sd">        :param tuple interval2: second interval in Cartesian product \</span>
+<span class="sd">                                corresponding to box</span>
+<span class="sd">        :param tuple interval3: (in 3d case) third interval in Cartesian \</span>
+<span class="sd">                                product corresponding to box</span>
+<span class="sd">        :param str my_face_color: color used to visualise faces of box \</span>
+<span class="sd">                                  (Default is blue)</span>
+<span class="sd">        :param float my_alpha: alpha value used for coloring faces</span>
+<span class="sd">        </span>
+<span class="sd">        :Example: ins.visualise_box((3, 4), (5, 7), (3, 5), my_face_color=&#39;red&#39;)</span>
+<span class="sd">        </span>
+<span class="sd">        .. todo::</span>
+<span class="sd">           Adjust size of figure to include box in any case.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Can only visualise 2- and 3-dimensional objective spaces.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_labels</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interval1</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interval2</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">interval1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">interval2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">x_y</span> <span class="o">=</span> <span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">interval3</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="o">*</span><span class="n">x_y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">facecolors</span><span class="o">=</span><span class="n">my_face_color</span><span class="p">,</span>
+                                      <span class="n">alpha</span><span class="o">=</span><span class="n">my_alpha</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interval3</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+                <span class="n">z</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">interval3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+                <span class="n">x_z</span> <span class="o">=</span> <span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">y_z</span> <span class="o">=</span> <span class="n">meshgrid</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">interval1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="o">*</span><span class="n">y_z</span><span class="p">,</span> <span class="n">facecolors</span><span class="o">=</span><span class="n">my_face_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">my_alpha</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">interval2</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">x_z</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i</span><span class="p">,</span> <span class="n">x_z</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">facecolors</span><span class="o">=</span><span class="n">my_face_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">my_alpha</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">interval3</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="o">*</span><span class="n">x_y</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">facecolors</span><span class="o">=</span><span class="n">my_face_color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">my_alpha</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PolyNondom.clear_visualisation"><a class="viewcode-back" href="../polynondom.html#polynondom.PolyNondom.clear_visualisation">[docs]</a>    <span class="k">def</span> <span class="nf">clear_visualisation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clear current visualisation.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="get_cmd_line_parser"><a class="viewcode-back" href="../polynondom.html#polynondom.get_cmd_line_parser">[docs]</a><span class="k">def</span> <span class="nf">get_cmd_line_parser</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Command line interface.&quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Enumerates and visualises different </span><span class="se">\</span>
+<span class="s1">                                         sets of non-dominated points&#39;</span><span class="p">)</span>
+    <span class="n">parent_parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="n">add_help</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--file&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;input_file&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Each line in the input file is assumed to contain </span><span class="se">\</span>
+<span class="s1">                                     an opening bracket [ and a closing bracket ] which </span><span class="se">\</span>
+<span class="s1">                                     contain the input values.&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--delim&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;delimiter&#39;</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Delimiter used to delimited the input values within </span><span class="se">\</span>
+<span class="s1">                                     the brackets (defaults to space).&#39;</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--visualise&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;specify which points to visualise: (d)ominated,</span><span class="se">\</span>
+<span class="s2">                               (n)on-dominated, (p)olynon-dominated,</span><span class="se">\</span>
+<span class="s2">                               (m)ononon-dominated&quot;</span><span class="p">,</span>
+                               <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;vis&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">])</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;--color&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Color used for point visualisation&quot;</span><span class="p">,</span>
+                               <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="s1">&#39;brown&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">])</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--noLines&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Specify that line projections of points should not be </span><span class="se">\</span>
+<span class="s1">                                     displayed. This might improve the general overview in </span><span class="se">\</span>
+<span class="s1">                                     3d visualisation if many points are involved.&#39;</span><span class="p">)</span>
+    <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">dest</span><span class="o">=</span><span class="s1">&#39;command&#39;</span><span class="p">)</span>
+    <span class="n">point_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;points&#39;</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="n">parent_parser</span><span class="p">],</span>
+                                         <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Read pre-computed points given in input file.&#39;</span><span class="p">)</span>
+    <span class="n">point_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--allNondom&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                              <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Switch to indicate that all pre-computed points are known </span><span class="se">\</span>
+<span class="s1">                                   to be non-dominated (defaults to False)&#39;</span><span class="p">)</span>
+    <span class="n">obj_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;objs&#39;</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="n">parent_parser</span><span class="p">],</span>
+                                       <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Read objectives given in input file.&#39;</span><span class="p">)</span>
+    <span class="n">obj_group</span> <span class="o">=</span> <span class="n">obj_parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">obj_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--assignment&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                           <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Specify that corresponding domain is an assignment problem.&#39;</span><span class="p">)</span>
+    <span class="n">obj_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--cube&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                           <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Specify that corresponding domain are the vertices of a cube.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">parser</span></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">my_parser</span> <span class="o">=</span> <span class="n">get_cmd_line_parser</span><span class="p">()</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">my_parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">command</span> <span class="o">==</span> <span class="s1">&#39;objs&#39;</span><span class="p">:</span>
+        <span class="n">objs</span> <span class="o">=</span> <span class="n">Objectives</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">delim</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">assignment</span><span class="p">:</span>
+            <span class="n">dim</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">objs</span><span class="o">.</span><span class="n">length</span><span class="p">())</span>
+            <span class="k">assert</span> <span class="n">dim</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+            <span class="n">domain</span> <span class="o">=</span> <span class="n">AssignmentDomain</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">dim</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">domain</span> <span class="o">=</span> <span class="n">CubeDomain</span><span class="p">(</span><span class="n">objs</span><span class="o">.</span><span class="n">length</span><span class="p">())</span>
+        <span class="n">ins</span> <span class="o">=</span> <span class="n">PolyNondom</span><span class="o">.</span><span class="n">compute_points</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">objs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ins</span> <span class="o">=</span> <span class="n">PolyNondom</span><span class="o">.</span><span class="n">read_points</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">delim</span><span class="p">,</span>
+                                     <span class="n">all_nondom</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">allNondom</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">vis</span><span class="p">:</span>
+        <span class="n">ins</span><span class="o">.</span><span class="n">visualise</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">vis</span><span class="p">),</span> <span class="n">my_color</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">color</span><span class="p">,</span>
+                      <span class="n">with_lines</span><span class="o">=</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">noLines</span><span class="p">)</span>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Sebastian Schenker.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

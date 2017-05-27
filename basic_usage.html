@@ -1,0 +1,260 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Basic usage &mdash; PolyNondom 0.9 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="PolyNondom 0.9 documentation" href="index.html"/>
+        <link rel="next" title="Command Line Interface" href="cmd.html"/>
+        <link rel="prev" title="Introduction" href="introduction.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PolyNondom
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Basic usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#usage-with-a-feasible-domain-and-objectives">Usage with a feasible domain and objectives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-with-pre-computed-points">Usage with pre-computed points</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cmd.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="polynondom.html">Module documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">PolyNondom</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Basic usage</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/basic_usage.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="basic-usage">
+<h1>Basic usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
+<p>PolyNondom expects either a feasible domain and corresponding
+objectives or pre-computed points in objective space.</p>
+<div class="section" id="usage-with-a-feasible-domain-and-objectives">
+<h2>Usage with a feasible domain and objectives<a class="headerlink" href="#usage-with-a-feasible-domain-and-objectives" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s assume we want to compute and visualise the non-dominated points
+of an assignment problem (with 4 agents and 4 jobs). Furthermore, let
+<em>/tmp/objs.txt</em> be the file with the objective functions having the
+following content:</p>
+<div class="line-block">
+<div class="line">[3, 6, 4, 5, 2, 3, 5, 4, 3, 5, 4, 2, 4, 5, 3, 6]</div>
+<div class="line">[2, 3, 5, 4, 5, 3, 4, 3, 5, 2, 6, 4, 4, 5, 2, 5]</div>
+<div class="line">[4, 2, 4, 2, 4, 2, 4, 6, 4, 2, 6, 3, 2, 4, 5, 3]</div>
+<div class="line"><br /></div>
+</div>
+<p>Using the python shell we could do the following:</p>
+<p><code class="docutils literal"><span class="pre">import</span> <span class="pre">polynondom</span> <span class="pre">as</span> <span class="pre">pnd</span></code></p>
+<p><code class="docutils literal"><span class="pre">objs</span> <span class="pre">=</span> <span class="pre">pnd.Objectives.read(&quot;/tmp/objs.txt&quot;,</span> <span class="pre">delimiter=',')</span></code>  # create <em>Objectives</em> instance</p>
+<p><code class="docutils literal"><span class="pre">ad</span> <span class="pre">=</span> <span class="pre">pnd.AssignmentDomain(4)</span></code> # create <em>AssignmentDomain</em> instance</p>
+<p><code class="docutils literal"><span class="pre">poly</span> <span class="pre">=</span> <span class="pre">pnd.PolyNondom.compute_points(ad,</span> <span class="pre">objs)</span></code> # create <em>PolyNondom</em> instance</p>
+<p><code class="docutils literal"><span class="pre">print(&quot;computed&quot;,</span> <span class="pre">poly)</span></code>  # print points sets to shell</p>
+<p><code class="docutils literal"><span class="pre">poly.visualise('n',</span> <span class="pre">my_color=&quot;blue&quot;)</span></code>  # visualise non-dominated points</p>
+<p><code class="docutils literal"><span class="pre">poly.save_figure(&quot;/tmp/my_figure.png&quot;,</span> <span class="pre">dpi=150,</span> <span class="pre">azimuth=96,</span> <span class="pre">elevation=21)</span></code> # save visualisation to file</p>
+<p>The result is:</p>
+<img alt="_images/nondom_points.png" src="_images/nondom_points.png" />
+</div>
+<div class="section" id="usage-with-pre-computed-points">
+<h2>Usage with pre-computed points<a class="headerlink" href="#usage-with-pre-computed-points" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s assume we have pre-computed (feasible) points of a bi-criteria
+knapsack problem and want to visualise the points. Let
+<em>/tmp/points.txt</em> be the file with the pre-computed points having the
+following content:</p>
+<div class="line-block">
+<div class="line">[ 13 4 ]</div>
+<div class="line">[ 15 6 ]</div>
+<div class="line">[ 7 10 ]</div>
+<div class="line">[ 3 19 ]</div>
+<div class="line">[ 6 10 ]</div>
+<div class="line">[ 12 12 ]</div>
+<div class="line"><br /></div>
+</div>
+<p>Using the python shell we could do the following:</p>
+<p><code class="docutils literal"><span class="pre">import</span> <span class="pre">polynondom</span> <span class="pre">as</span> <span class="pre">pnd</span></code></p>
+<p><code class="docutils literal"><span class="pre">poly</span> <span class="pre">=</span> <span class="pre">pns.PolyNondom.read_points(&quot;/tmp/points.txt&quot;,</span> <span class="pre">delimiter='</span> <span class="pre">')</span></code> # read points from file</p>
+<p><code class="docutils literal"><span class="pre">poly.visualise('nd')</span></code> # visualise non-dominated points (in red) and dominated points (in black)</p>
+<p><code class="docutils literal"><span class="pre">poly.save_figure('/tmp/points.png',</span> <span class="pre">azimuth=-89,</span> <span class="pre">elevation=88,</span> <span class="pre">dpi=150)</span></code> # save visualisation to file</p>
+<p>The result is:</p>
+<img alt="_images/points.png" src="_images/points.png" />
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cmd.html" class="btn btn-neutral float-right" title="Command Line Interface" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="introduction.html" class="btn btn-neutral" title="Introduction" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Sebastian Schenker.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
