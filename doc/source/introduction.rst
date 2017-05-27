@@ -1,7 +1,7 @@
 Introduction
 ============
    
-PolyNondom_ is a small tool that helps to enumerate and visualise
+PolyNondom_ is a tool that helps to enumerate and visualise
 different sets of points, in particular, different subsets of
 non-dominated points. It is not supposed to compete with proper solvers
 for multi-criteria integer optimisation but to help in developing and

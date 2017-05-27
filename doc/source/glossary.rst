@@ -18,8 +18,9 @@ dominated point
 
 polynon-dominated point
     A non-dominated point *y* is polynon-dominated (w.r.t. the underlying
-    multi-objective problem) if the projection of the point is also non-dominated
-    for multi-objective problem where one of the
+    multi-objective problem) if the projection of the point is also
+    non-dominated for the given multi-objective problem where one of
+    the objectives was neglected
 
 .. _monond-label:
 
