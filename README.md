@@ -27,15 +27,15 @@ installed).
 Example visualisations
 ---------
 
-![points][points]
+![points][nondom points]
 
-![2d points][points2d]
+![points][points]
 
 ![boxes][boxes]
 
-[points]: ./doc/source/points.png "Visualisation showing non-dominated points (in red) and dominated points (in black)."
+[nondom points]: ./doc/source/nondom_points.png 
 
-[points2d]: ./doc/source/points_2d.png "Visualisation of non-dominated points for bi-criteria problem"
+[points]: ./doc/source/points.png 
 
 [boxes]: ./doc/source/boxes.png "Visualisation showing polynon-dominated points (in blue) and mononon-dominated points (in brown) as well as feasible rectangular boxes given by polynon-dominated points."
 
