@@ -29,9 +29,10 @@ Available classes
 """
 
 from argparse import ArgumentParser
-from collections import defaultdict, Iterable
-from itertools import chain, permutations, product
+from collections import Iterable
+from itertools import combinations, permutations, product
 import logging
+import math
 from numpy import array, dot, linspace, meshgrid
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
@@ -142,6 +143,14 @@ class Objectives:
         """Initialise with no objectives."""
         self._objectives = []
 
+    def length(self):
+        if self._objectives:
+            for i, j in combinations(self._objectives, 2):
+                assert len(i) == len(j)
+            return len(self._objectives[0])
+        else:
+            return 0
+
     @property
     def obj(self):
         """Objective functions
@@ -172,6 +181,37 @@ class Objectives:
         return "\n".join(["obj_" + str(ind) + ": " + str(obj) for ind, obj
                           in enumerate(self._objectives, 1)])
 
+    @classmethod
+    def read(cls, file, *, delimiter=' '):
+        """Read objectives given via file.
+
+        :param str file: File(name) containing objectives
+        :param str delimiter: Delimiter (Defaults to ' ')
+        :rtype: :class:`Objectives`
+        :raises FileNotFoundError: if file cannot be found
+        :raise PermissionError: if file cannot be opened
+
+        :Example: obj = Objectives.read(filename, delimiter=',') where \
+                        filename corresponds to the location of the input file
+        """
+        assert isinstance(file, str)
+        ins = cls()
+        try:
+            with open(file, mode='r', encoding='utf-8') as file:
+                for line in file:
+                    bracket_open = line.find("[")
+                    bracket_close = line.find("]")
+                    if bracket_open == -1 or bracket_close == -1:
+                        continue
+                    else:
+                        substring = line[bracket_open+1:bracket_close]
+                        ins._objectives.append(tuple(map(lambda p: int(p) if p.is_integer() else p, (float(p) for p in substring.split(sep=delimiter) if p))))
+        except FileNotFoundError:
+            print("File not found.")
+        except PermissionError:
+            print("Lacking permissions to open file.")
+        else:
+            return ins
 
 class Points:
     """Represents certain set of points in objective space.
@@ -268,8 +308,6 @@ class PolyNondom:
        A non-dominated point *y* is polynon-dominated (w.r.t. the underlying multi-objective problem)
        if the projection of the point is also non-dominated for multi-objective problem where one of the
 
-
- 
     mononon-dominated point
        A non-dominated point *y* is mononon-dominated if *y* is not 
        polynon-dominated.
@@ -290,8 +328,8 @@ class PolyNondom:
     def __init__(self):
         """Initialises different point sets and visualisation related items."""
         self._dim = 0
-        self._fig = None
-        self._ax = None
+        self._fig = plt.figure()
+        self._ax = self._fig.add_subplot(111, projection='3d')
         self._message = "String combined of the following letters expected:"
         self.points = {'d': Points('dominated', 'black'),
                        'n': Points('non-dominated', 'red'),
@@ -299,7 +337,12 @@ class PolyNondom:
                        'm': Points('mononon-dominated', 'brown')}
         self.obj_to_polynd_points = []
         self.polynd_boxes = []
-        self.visualised_boxes = []
+        self._ax_limits = {'x': [],
+                           'y': [],
+                           'z': []}
+        self._ax_setter = {'x': self._ax.set_xlim3d,
+                           'y': self._ax.set_ylim3d,
+                           'z': self._ax.set_zlim3d}
 
     def __str__(self):
         """Returns readable representation of different point sets."""
@@ -533,28 +576,26 @@ class PolyNondom:
         assert isinstance(points, Iterable)
         return list([(min(item)-1, max(item)+1) for item in zip(*points)])
 
-    def _update_ax_limits(self, points):
+    def _update_ax_limits(self, identifier, coordinates):
         """Update axis limits."""
-        limits = PolyNondom._compute_ax_limits(points)
-        assert len(limits) >= 2
-        self._ax.set_xlim3d(*limits[0])
-        self._ax.set_ylim3d(*limits[1])
-        if len(limits) == 3:
-            self._ax.set_zlim3d(*limits[2])
+        assert identifier in ['x', 'y', 'z']
+        min_val = min(coordinates) - 1
+        max_val = max(coordinates) + 1
+        if not self._ax_limits[identifier]:
+            self._ax_limits[identifier] = [min_val, max_val]
+        else:
+            if min_val < self._ax_limits[identifier][0]:
+                self._ax_limits[identifier][0] = min_val
+            if max_val > self._ax_limits[identifier][1]:
+                self._ax_limits[identifier][1] = max_val
 
-
-    def _init_visualisation(self):
-        """Initialise visualisation-related objects."""
-        self._fig = plt.figure()
-        self._ax = self._fig.add_subplot(111, projection='3d')
-        self._ax.set_xlim3d(-20, 20)
-        self._ax.set_ylim3d(-20, 20)
+    def _init_labels(self):
+        """Initialise labels."""
         self._ax.tick_params(axis='x', labelsize=8)
         self._ax.tick_params(axis='y', labelsize=8)
         self._ax.set_xlabel(r'$c^{\top}_1 x$', fontsize=12)
         self._ax.set_ylabel(r'$c^{\top}_2 x$', fontsize=12)
         if self._dim == 3:
-            self._ax.set_zlim3d(-20, 20)
             self._ax.tick_params(axis='z', labelsize=8)
             self._ax.set_zlabel(r'$c^{\top}_3 x$', fontsize=12)
         else:
@@ -567,15 +608,16 @@ class PolyNondom:
         Visualises given points and saves corresponding matplotlib objects 
         in _visualised map.
         """
-        x, y, *z = zip(*self.points[id].points)
-        if not z:
-            z = [0]
-        self.points[id].add_visualised_items(self._ax.scatter(x, y, *z, zdir='z',
-                                                              c=color, color=color,
-                                                              s=marker_size,
-                                                              marker=marker,
-                                                              depthshade=False))
-        plt.pause(0.001)
+        x_coords, y_coords, *list_of_z_coords = zip(*self.points[id].points)
+        z_coords = [0] if not list_of_z_coords else list_of_z_coords[0]
+        self._update_ax_limits('x', x_coords)
+        self._update_ax_limits('y', y_coords)
+        self._update_ax_limits('z', z_coords)
+        self._ax.scatter(x_coords, y_coords, z_coords, zdir='z', c=color, color=color, s=marker_size, marker=marker, depthshade=False)
+        self._ax_setter['x'](*self._ax_limits['x'])
+        self._ax_setter['y'](*self._ax_limits['y'])
+        self._ax_setter['z'](*self._ax_limits['z'])
+        plt.pause(0.0001)
 
     def _visualise_lines(self, id, *, color, width, style):
         """Visualises line projections corresponding to given points.
@@ -583,29 +625,26 @@ class PolyNondom:
         Visualises line projections of given points and saves corresponding 
         matplotlib objects in _visualised map.        
         """
-        min_x, _ = self._ax.get_xlim3d()
-        min_y, _ = self._ax.get_ylim3d()
-        min_z, _ = self._ax.get_zlim3d()
+        min_x, _ = self._ax_limits['x']
+        min_y, _ = self._ax_limits['y']
+        min_z, _ = self._ax_limits['z']
         for x, y, z in self.points[id].points:
-            self.points[id].add_visualised_items(*self._ax.plot([x, x], [min_y, y],
-                                                               [min_z, min_z],
+            self._ax.plot([x, x], [min_y, y],[min_z, min_z],
                                                                color=color,
                                                                linewidth=width,
-                                                               linestyle=style))
-            self.points[id].add_visualised_items(*self._ax.plot([min_x, x], [y, y],
-                                                               [min_z, min_z],
+                                                               linestyle=style)
+            self._ax.plot([min_x, x], [y, y], [min_z, min_z],
                                                                color=color,
                                                                linewidth=width,
-                                                               linestyle=style))
-            self.points[id].add_visualised_items(*self._ax.plot([x, x], [y, y],
-                                                               [min_z, z],
+                                                               linestyle=style)
+            self._ax.plot([x, x], [y, y],[min_z, z],
                                                                color=color,
                                                                linewidth=width,
-                                                               linestyle=style))
-            plt.pause(0.001)
+                                                               linestyle=style)
+            plt.pause(0.0001)
 
     def visualise(self, id, *, my_color=None, my_width=0.8, my_style='--',
-                  my_marker='o', my_marker_size=40, with_lines=True, show=True):
+                  my_marker='o', my_marker_size=40, with_lines=True):
         """Visualises point set corresponding to id.
         
         :param str id: identifier corresponding to (combinations of) \
@@ -622,7 +661,8 @@ class PolyNondom:
         :param int my_marker_size: size used for marker (Default is 40)
         :param bool with_lines: Specifier if lines should be visualised \
                                 in the 3d case (Default is True)
-                                 
+        :param bool adjust_ax_limits: Specifier if axes limits should be adjusted (Default is True)
+
         :Example: ins.visualise('dp', my_color='blue') 
         """
         if self._dim < 2 or self._dim > 3:
@@ -632,27 +672,22 @@ class PolyNondom:
             print(self._message)
             print(" ".join(self.points.keys()))
         else:
-            if not self._fig:
-                self._init_visualisation()
+            self._init_labels()
             for item in id:
                 if self.points[item].points:
                     color = self.points[item].color if my_color is None else my_color
-                    self._visualise_points(item, color=color, marker=my_marker,
-                                           marker_size=my_marker_size)
-            self._update_ax_limits(set.union(*[self.points[key].points
-                                               for key in self.points.keys() if
-                                               self.points[key].is_visualised]))
+                    self._visualise_points(item, color=color, marker=my_marker, marker_size=my_marker_size)
+
             if self._dim == 3 and with_lines:
                 for item in id:
                     if self.points[item].points:
                         color = self.points[item].color if my_color is None else my_color
                         self._visualise_lines(item, color=color, width=my_width,
                                               style=my_style)
-            if show:
-                if __name__ == '__main__':
-                    plt.show()
-                else:
-                    plt.draw()
+            if __name__ == '__main__':
+                plt.show()
+            else:
+                plt.draw()
 
     def save_figure(self, output_name, *, dpi=400, elevation=30, azimuth=50):
         self._ax.view_init(elevation, azimuth)
@@ -709,8 +744,7 @@ class PolyNondom:
         if self._dim < 2 or self._dim > 3:
             print("Can only visualise 2- and 3-dimensional objective spaces.\n")
         else:
-            if not self._fig:
-                self._init_visualisation()
+            self._init_labels()
             assert isinstance(interval1, tuple) and isinstance(interval2, tuple)
             x = linspace(*interval1, 3)
             y = linspace(*interval2, 3)
@@ -724,29 +758,17 @@ class PolyNondom:
                 x_z = meshgrid(x, z, sparse=True)
                 y_z = meshgrid(y, z, sparse=True)
                 for i in interval1:
-                    self._visualised_boxes.append(self._ax.plot_surface(i, *y_z,
-                                                                       facecolors=my_face_color,
-                                                                       alpha=my_alpha))
+                    self._ax.plot_surface(i, *y_z, facecolors=my_face_color, alpha=my_alpha)
                 for i in interval2:
-                    self._visualised_boxes.append(self._ax.plot_surface(x_z[0],
-                                                                       i, x_z[1],
-                                                                       facecolors=my_face_color,
-                                                                       alpha=my_alpha))
+                    self._ax.plot_surface(x_z[0], i, x_z[1], facecolors=my_face_color, alpha=my_alpha)
                 for i in interval3:
-                    self._visualised_boxes.append(self._ax.plot_surface(*x_y, i,
-                                                                       facecolors=my_face_color,
-                                                                       alpha=my_alpha))
+                    self._ax.plot_surface(*x_y, i, facecolors=my_face_color, alpha=my_alpha)
             plt.draw()
 
 
-    def close_visualisation(self):
-        """Closes current visualisation window and resets related elements."""
-        for key in self.points.keys():
-            if self.points[key].is_visualised:
-                self.points[key].remove_visualised_items()
-        plt.close(self._fig)
-        self._fig = None
-        self._ax = None
+    def clear_visualisation(self):
+        """Clears current visualisation."""
+        self._ax.clear()
 
 
 def get_cmd_line_parser():
@@ -754,13 +776,13 @@ def get_cmd_line_parser():
     parser = ArgumentParser(description='Enumerates and visualises different \
                                          sets of non-dominated points')
     parent_parser = ArgumentParser(add_help=False)
-    parent_parser.add_argument('-f', '--file', metavar="input_file", type=str, dest='file',
+    parent_parser.add_argument('-f', '--file', metavar="input_file", type=str,
                                help='Each line in the input file is assumed to contain an opening bracket [  and a \
                                     closing bracket ] which contain the input values.',
                                required=True)
     parent_parser.add_argument('--delim', default=' ', type=str,
                                help='Delimiter used to delimited the input values within the brackets (defaults to space).',
-                               metavar='delimiter', dest='delim')
+                               metavar='delimiter')
     parent_parser.add_argument('-v', '--visualise', type=str, default="",
                                help="specify which points to visualise: (d)ominated,\
                                (n)on-dominated, (p)olynon-dominated,\
@@ -769,7 +791,7 @@ def get_cmd_line_parser():
     parent_parser.add_argument('-c', '--color', type=str, default=None,
                                  help="Color used for point visualisation",
                                  choices=['red', 'blue', 'black', 'brown', 'green'])
-    parent_parser.add_argument('--noLines', default=True, action='store_true',
+    parent_parser.add_argument('--noLines', default=False, action='store_true',
                          help='Specify that line projections of points should not be displayed. This \
                               might improve the general overview in 3d visualisation if many points are involved.')
     subparsers = parser.add_subparsers(dest='command')
@@ -777,37 +799,34 @@ def get_cmd_line_parser():
                                          parents=[parent_parser])
     point_parser.add_argument('--allNondom', default=False,
                               help='Switch to indicate that all pre-computed points are known to be non-dominated (defaults to False)',
-                              action='store_false', dest='allnondom')
+                              action='store_true', dest='allnondom')
     obj_parser = subparsers.add_parser('objs', parents=[parent_parser],
                                        description='Read objectives given in input file.')
-    obj_parser.add_argument('-n', '--numObjs', required=True,
-                        help='Specify the number of objectives that should be read from the input file.',
-                        dest='o_num', type=int, metavar='integer')
     obj_group = obj_parser.add_mutually_exclusive_group(required=True)
-    obj_group.add_argument('--assignment', action='store_true',
+    obj_group.add_argument('--assignment', action='store_true', default=False,
                            help='Specify that corresponding domain is an assignment problem.')
-    obj_group.add_argument('--cube', action='store_true',
+    obj_group.add_argument('--cube', action='store_true', default=False,
                            help='Specify that corresponding domain are the vertices of a cube.')
     return parser
 
 if __name__ == '__main__':
     my_parser = get_cmd_line_parser()
     args = my_parser.parse_args()
-    ins = None
     if args.command == 'objs':
-        if args.a_dim:
-            domain = AssignmentDomain(args.a_dim)
+        objs = Objectives.read(args.file, delimiter=args.delim)
+        if args.assignment:
+            dim = math.sqrt(objs.length())
+            assert dim == int(dim)
+            domain = AssignmentDomain(int(dim))
         else:
-            domain = CubeDomain(args.c_dim)
-        objs = Objectives()
-        for i in range(args.o_num):
-            objs.obj = [randint(*args.o_rand) for i in range(domain.dim)]
+            domain = CubeDomain(objs.length())
         ins = PolyNondom.compute_points(domain, objs)
-    elif args.command == 'read':
+    else:
         ins = PolyNondom.read_points(args.p_file, delimiter=args.p_delim,
                                      all_nondom=args.p_allnondom)
-    if ins and args.vis:
+    print(ins)
+    if args.vis:
         ins.visualise("".join(args.vis), my_color=args.color,
-                      with_lines=args.lines)
+                          with_lines=not args.noLines)
 
 

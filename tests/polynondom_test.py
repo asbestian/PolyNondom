@@ -23,6 +23,25 @@ class DomainTest(TestCase):
         self.assertEqual(expected_dom, set(cube_domain))
 
 
+class ObjectivesTest(TestCase):
+
+    def test_read(self):
+        temp = NamedTemporaryFile(delete=False)
+        temp.write(b'[3, 6, 4, 5, 2, 3, 5, 4, 3, 5, 4, 2, 4, 5, 3, 6]\n'
+                   b'[2, 3, 5, 4, 5, 3, 4, 3, 5, 2, 6, 4, 4, 5, 2, 5]\n'
+                   b'[4, 2, 4, 2, 4, 2, 4, 6, 4, 2, 6, 3, 2, 4, 5, 3]')
+        temp.flush()
+        temp.close()
+        objs = Objectives.read(temp.name, delimiter=',')
+        assert os.path.exists(temp.name)
+        os.remove(temp.name)
+        assert not os.path.exists(temp.name)
+        objs2 = Objectives()
+        objs2.obj = [3, 6, 4, 5, 2, 3, 5, 4, 3, 5, 4, 2, 4, 5, 3, 6]
+        objs2.obj = [2, 3, 5, 4, 5, 3, 4, 3, 5, 2, 6, 4, 4, 5, 2, 5]
+        objs2.obj = [4, 2, 4, 2, 4, 2, 4, 6, 4, 2, 6, 3, 2, 4, 5, 3]
+        self.assertEqual(objs._objectives, objs2._objectives)
+
 class PolyNondomTest(TestCase):
 
     def setUp(self):
