@@ -18,17 +18,26 @@ Documentation
 -------------
 
 The documentation for PolyNondom
-is [online available ](https://asbestian.github.io/PolyNondom/).  It
-can also be compiled offline in the `/doc` folder via `make html` (provided
-that [sphinx](http://www.sphinx-doc.org/en/stable/) is installed).
+is [online available ](https://asbestian.github.io/PolyNondom/).
 
-Examples
+It can also be compiled offline in the `/doc` folder via `make html`
+(provided that [sphinx](http://www.sphinx-doc.org/en/stable/) is
+installed).
+
+Example visualisations
 ---------
 
-ToDo
+![Alt points][points]
+
+![Alt boxes][boxes]
+
+[points]: ./doc/source/points.png "Visualisation showing non-dominated points (in red) and dominated points (in black)."
+
+[boxes]: ./doc/source/boxes.png "Visualisation showing polynon-dominated points (in blue) and mononon-dominated points (in brown) as well as feasible rectangular boxes given by polynon-dominated points."
+
 
 Usage and command line interface
 --------------------------------
 
 Please refer to the sections **Basic usage** and **Command Line
-Interface** in the documentation.
+Interface** in the [documentation](https://asbestian.github.io/PolyNondom/).

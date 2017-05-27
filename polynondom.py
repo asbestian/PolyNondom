@@ -579,8 +579,8 @@ class PolyNondom:
     def _update_ax_limits(self, identifier, coordinates):
         """Update axis limits."""
         assert identifier in ['x', 'y', 'z']
-        min_val = min(coordinates) - 1
-        max_val = max(coordinates) + 1
+        min_val = min(coordinates) - 2
+        max_val = max(coordinates) + 2
         if not self._ax_limits[identifier]:
             self._ax_limits[identifier] = [min_val, max_val]
         else:
@@ -799,7 +799,7 @@ def get_cmd_line_parser():
                                          parents=[parent_parser])
     point_parser.add_argument('--allNondom', default=False,
                               help='Switch to indicate that all pre-computed points are known to be non-dominated (defaults to False)',
-                              action='store_true', dest='allnondom')
+                              action='store_true')
     obj_parser = subparsers.add_parser('objs', parents=[parent_parser],
                                        description='Read objectives given in input file.')
     obj_group = obj_parser.add_mutually_exclusive_group(required=True)
@@ -822,11 +822,11 @@ if __name__ == '__main__':
             domain = CubeDomain(objs.length())
         ins = PolyNondom.compute_points(domain, objs)
     else:
-        ins = PolyNondom.read_points(args.p_file, delimiter=args.p_delim,
-                                     all_nondom=args.p_allnondom)
+        ins = PolyNondom.read_points(args.file, delimiter=args.delim,
+                                     all_nondom=args.allNondom)
     print(ins)
     if args.vis:
         ins.visualise("".join(args.vis), my_color=args.color,
-                          with_lines=not args.noLines)
+        with_lines=not args.noLines)
 
 
