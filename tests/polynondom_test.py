@@ -55,11 +55,6 @@ class PolyNondomTest(TestCase):
                                  ((13, 19), (14, 16), (11, 14)),
                                  ((15, 19), (14, 16), (11, 17))}
 
-    def test_compute_ax_limits(self):
-        points = [(1, 2, 3, 4), (1, 4, -1, 4), (0, 5, 2, 4), (3, -5, 9, 4)]
-        expected_limits = [(-1, 4), (-6, 6), (-2, 10), (3, 5)]
-        self.assertEqual(expected_limits, PolyNondom._compute_ax_limits(points))
-
     def test_read_points(self):
         temp = NamedTemporaryFile(delete=False)
         temp.write(b'[13, 16, 11], [18, 18, 14], [20, 17, 13],\n'
