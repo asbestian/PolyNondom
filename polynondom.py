@@ -36,7 +36,6 @@ import math
 from numpy import array, dot, linspace, meshgrid
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
-from random import randint
 
 class Error(Exception):
     """Base class for exceptions."""
@@ -306,13 +305,14 @@ class PolyNondom:
         
     polynon-dominated point
        A non-dominated point *y* is polynon-dominated (w.r.t. the underlying multi-objective problem)
-       if the projection of the point is also non-dominated for multi-objective problem where one of the
+       if the projection of the point is also non-dominated for the given multi-objective problem where
+       one of the objectives was neglected
 
     mononon-dominated point
        A non-dominated point *y* is mononon-dominated if *y* is not 
        polynon-dominated.
         
-    See also `mathematical definitions <https://opus4.kobv.de/opus4-zib/files/6128/report_16-55.pdf>`_
+    See also the `mathematical definitions <https://opus4.kobv.de/opus4-zib/files/6128/report_16-55.pdf>`_
 
     :ivar int _dim: Dimension of objective space
     :ivar Figure _fig: Figure object of matplotlib
@@ -322,7 +322,9 @@ class PolyNondom:
     :ivar list obj_to_polynd_points: maps objective to polynon-dominated points
     :ivar list polynd_boxes: Container for feasible boxes given by \
           polynon-dominated points
-    :ivar list visualised_boxes: Container for visualised box elements
+    :ivar dict _ax_limits: Maps coordinate axes to axes limits used in visualisation
+    :ivar dict _ax_setter: Maps coordinate axes to matplotlib functions used for \
+          setting axes limits
     """
 
     def __init__(self):
@@ -561,21 +563,6 @@ class PolyNondom:
         """Computes mononon-dominated points."""
         self.points['m'].update(self.points['n'].points.difference(self.points['p'].points))
 
-    @staticmethod
-    def _compute_ax_limits(points):
-        """Update axes limits based on given points.
-        
-        Axis limits for each dimension are given by tuple consisting of minimal 
-        objective value minus 1 and maximal objective value plus 1, 
-        respectively, w.r.t. given points.
-         
-        :param Iterable points: Feasible points
-        :rtype: list
-        :return: List of tuples
-        """
-        assert isinstance(points, Iterable)
-        return list([(min(item)-1, max(item)+1) for item in zip(*points)])
-
     def _update_ax_limits(self, identifier, coordinates):
         """Update axis limits."""
         assert identifier in ['x', 'y', 'z']
@@ -613,7 +600,8 @@ class PolyNondom:
         self._update_ax_limits('x', x_coords)
         self._update_ax_limits('y', y_coords)
         self._update_ax_limits('z', z_coords)
-        self._ax.scatter(x_coords, y_coords, z_coords, zdir='z', c=color, color=color, s=marker_size, marker=marker, depthshade=False)
+        self._ax.scatter(x_coords, y_coords, z_coords, zdir='z', c=color, color=color,
+                         s=marker_size, marker=marker, depthshade=False)
         self._ax_setter['x'](*self._ax_limits['x'])
         self._ax_setter['y'](*self._ax_limits['y'])
         self._ax_setter['z'](*self._ax_limits['z'])
@@ -645,7 +633,7 @@ class PolyNondom:
 
     def visualise(self, id, *, my_color=None, my_width=0.8, my_style='--',
                   my_marker='o', my_marker_size=40, with_lines=True):
-        """Visualises point set corresponding to id.
+        """Visualises point sets corresponding to id.
         
         :param str id: identifier corresponding to (combinations of) \
                        'd'ominated, 'n'on-dominated, 'p'olynon-dominated, \
@@ -661,7 +649,6 @@ class PolyNondom:
         :param int my_marker_size: size used for marker (Default is 40)
         :param bool with_lines: Specifier if lines should be visualised \
                                 in the 3d case (Default is True)
-        :param bool adjust_ax_limits: Specifier if axes limits should be adjusted (Default is True)
 
         :Example: ins.visualise('dp', my_color='blue') 
         """
@@ -676,12 +663,9 @@ class PolyNondom:
             for item in id:
                 if self.points[item].points:
                     color = self.points[item].color if my_color is None else my_color
-                    self._visualise_points(item, color=color, marker=my_marker, marker_size=my_marker_size)
-
-            if self._dim == 3 and with_lines:
-                for item in id:
-                    if self.points[item].points:
-                        color = self.points[item].color if my_color is None else my_color
+                    self._visualise_points(item, color=color, marker=my_marker,
+                                           marker_size=my_marker_size)
+                    if self._dim == 3 and with_lines:
                         self._visualise_lines(item, color=color, width=my_width,
                                               style=my_style)
             if __name__ == '__main__':
@@ -692,30 +676,6 @@ class PolyNondom:
     def save_figure(self, output_name, *, dpi=400, elevation=30, azimuth=50):
         self._ax.view_init(elevation, azimuth)
         self._fig.savefig(output_name, dpi=dpi)
-
-    def undo_visualise(self, id):
-        """Remove visualisation objects corresponding to given identifier.
-        
-        :param str id: identifier (combination of ('d', 'n', 'm', 'p', 'b') \
-                       corresponding to objects that shall be removed from \
-                       current visualisation 
-       
-        :Example: ins.undo_visualize('dp')
-        """
-        if not isinstance(id, str) or \
-                not all([self.points[item].is_visualised for item in id]):
-            print(self._message)
-            print(" ".join([key for key in self.points.keys() if self.points[key].is_visualised]))
-        else:
-            for item in id:
-                self.points[item].remove_visualised_items()
-            plt.draw()
-
-    def undo_box_visualisation(self):
-        """Removes visualised boxes."""
-        for box in self._visualised_boxes:
-            box.remove()
-        self._visualised_boxes = []
 
     def visualise_polynd_boxes(self):
         """Visualises all feasible boxes given by polynon-dominated points."""
@@ -765,9 +725,8 @@ class PolyNondom:
                     self._ax.plot_surface(*x_y, i, facecolors=my_face_color, alpha=my_alpha)
             plt.draw()
 
-
     def clear_visualisation(self):
-        """Clears current visualisation."""
+        """Clear current visualisation."""
         self._ax.clear()
 
 
@@ -777,29 +736,30 @@ def get_cmd_line_parser():
                                          sets of non-dominated points')
     parent_parser = ArgumentParser(add_help=False)
     parent_parser.add_argument('-f', '--file', metavar="input_file", type=str,
-                               help='Each line in the input file is assumed to contain an opening bracket [  and a \
-                                    closing bracket ] which contain the input values.',
-                               required=True)
-    parent_parser.add_argument('--delim', default=' ', type=str,
-                               help='Delimiter used to delimited the input values within the brackets (defaults to space).',
-                               metavar='delimiter')
+                               help='Each line in the input file is assumed to contain \
+                                     an opening bracket [ and a closing bracket ] which \
+                                     contain the input values.', required=True)
+    parent_parser.add_argument('--delim', default=' ', type=str, metavar='delimiter',
+                               help='Delimiter used to delimited the input values within \
+                                     the brackets (defaults to space).')
     parent_parser.add_argument('-v', '--visualise', type=str, default="",
                                help="specify which points to visualise: (d)ominated,\
                                (n)on-dominated, (p)olynon-dominated,\
                                (m)ononon-dominated",
-                                 nargs='+', dest='vis', choices=['d', 'n', 'm', 'p'])
+                               nargs='+', dest='vis', choices=['d', 'n', 'm', 'p'])
     parent_parser.add_argument('-c', '--color', type=str, default=None,
-                                 help="Color used for point visualisation",
-                                 choices=['red', 'blue', 'black', 'brown', 'green'])
+                               help="Color used for point visualisation",
+                               choices=['red', 'blue', 'black', 'brown', 'green'])
     parent_parser.add_argument('--noLines', default=False, action='store_true',
-                         help='Specify that line projections of points should not be displayed. This \
-                              might improve the general overview in 3d visualisation if many points are involved.')
+                               help='Specify that line projections of points should not be \
+                                     displayed. This might improve the general overview in \
+                                     3d visualisation if many points are involved.')
     subparsers = parser.add_subparsers(dest='command')
-    point_parser = subparsers.add_parser('points', description='Read pre-computed points given in input file.',
-                                         parents=[parent_parser])
-    point_parser.add_argument('--allNondom', default=False,
-                              help='Switch to indicate that all pre-computed points are known to be non-dominated (defaults to False)',
-                              action='store_true')
+    point_parser = subparsers.add_parser('points', parents=[parent_parser],
+                                         description='Read pre-computed points given in input file.')
+    point_parser.add_argument('--allNondom', default=False, action='store_true',
+                              help='Switch to indicate that all pre-computed points are known \
+                                   to be non-dominated (defaults to False)')
     obj_parser = subparsers.add_parser('objs', parents=[parent_parser],
                                        description='Read objectives given in input file.')
     obj_group = obj_parser.add_mutually_exclusive_group(required=True)
@@ -827,6 +787,6 @@ if __name__ == '__main__':
     print(ins)
     if args.vis:
         ins.visualise("".join(args.vis), my_color=args.color,
-        with_lines=not args.noLines)
+                      with_lines=not args.noLines)
 
 
