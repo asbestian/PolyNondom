@@ -345,6 +345,7 @@ class PolyNondom:
         self._ax_setter = {'x': self._ax.set_xlim3d,
                            'y': self._ax.set_ylim3d,
                            'z': self._ax.set_zlim3d}
+        self._feasible_points = {}
 
     def __str__(self):
         """Returns readable representation of different point sets."""
@@ -353,8 +354,8 @@ class PolyNondom:
             output += subset.id + ": " + str(subset) + "\n"
         return output
 
-    @staticmethod
-    def _generate_all_feasible_points(domain, objectives):
+    #@staticmethod
+    def _generate_all_feasible_points(self, domain, objectives):
         """Generator for feasible points in objective space.
         
         :param iterable domain: Feasible domain
@@ -365,6 +366,7 @@ class PolyNondom:
         assert isinstance(domain, Iterable)
         assert isinstance(objectives, Objectives)
         for sol in domain:
+            self._feasible_points[objectives(sol)] = sol
             yield objectives(sol)
 
     @staticmethod
@@ -576,18 +578,26 @@ class PolyNondom:
             if max_val > self._ax_limits[identifier][1]:
                 self._ax_limits[identifier][1] = max_val
 
-    def _init_labels(self):
+    def set_labels(self, *, my_xlabel="r'$c^{\top}_1 x$'",
+                   my_ylabel="r'$c^{\top}_2 x$'",
+                   my_zlabel="r'$c^{\top}_3 x$'",
+                   my_labelsize=8, my_fontsize=12,
+                   my_style='sci'):
         """Initialise labels."""
-        self._ax.tick_params(axis='x', labelsize=8)
-        self._ax.tick_params(axis='y', labelsize=8)
-        self._ax.set_xlabel(r'$c^{\top}_1 x$', fontsize=12)
-        self._ax.set_ylabel(r'$c^{\top}_2 x$', fontsize=12)
+        self._ax.tick_params(axis='x', labelsize=my_labelsize)
+        plt.ticklabel_format(style=my_style, axis='x', scilimits=(0,0))
+        self._ax.tick_params(axis='y', labelsize=my_labelsize)
+        plt.ticklabel_format(style=my_style, axis='y', scilimits=(0,0))
+        self._ax.set_xlabel(my_xlabel, fontsize=my_fontsize)
+        self._ax.set_ylabel(my_ylabel, fontsize=my_fontsize)
         if self._dim == 3:
-            self._ax.tick_params(axis='z', labelsize=8)
-            self._ax.set_zlabel(r'$c^{\top}_3 x$', fontsize=12)
+            self._ax.tick_params(axis='z', labelsize=my_labelsize)
+            plt.ticklabel_format(style=my_style, axis='z', scilimits=(0,0))
+            self._ax.set_zlabel(my_zlabel, fontsize=my_fontsize)
         else:
             self._ax.set_zticks([])
             self._ax.w_zaxis.line.set_visible(False)
+        plt.pause(0.0001)
 
     def _visualise_points(self, id, *, color, marker, marker_size):
         """Visualises given points.
@@ -659,7 +669,6 @@ class PolyNondom:
             print(self._message)
             print(" ".join(self.points.keys()))
         else:
-            self._init_labels()
             for item in id:
                 if self.points[item].points:
                     color = self.points[item].color if my_color is None else my_color
@@ -683,7 +692,11 @@ class PolyNondom:
             self.visualise_box(*box)
 
     def visualise_box(self, interval1, interval2, interval3=None, *,
-                      my_face_color='blue', my_alpha=0.2):
+                      my_face_color='blue', my_alpha=0.2,
+                      my_xlabel="r'$c^{\top}_1 x$'",
+                      my_ylabel="r'$c^{\top}_2 x$'",
+                      my_zlabel=r'$c^{\top}_3 x$',
+                      my_label_size=8, my_font_size=12):
         """Visualises given rectangular box.
         
         :param tuple interval1: first interval in Cartesian product \
@@ -704,7 +717,6 @@ class PolyNondom:
         if self._dim < 2 or self._dim > 3:
             print("Can only visualise 2- and 3-dimensional objective spaces.\n")
         else:
-            self._init_labels()
             assert isinstance(interval1, tuple) and isinstance(interval2, tuple)
             x = linspace(*interval1, 3)
             y = linspace(*interval2, 3)
@@ -788,5 +800,6 @@ if __name__ == '__main__':
     if args.vis:
         ins.visualise("".join(args.vis), my_color=args.color,
                       with_lines=not args.noLines)
-
+    for i,j in ins._feasible_points.items():
+        print(i, j)
 

@@ -35,7 +35,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'sphinx.ext.viewcode',
               'sphinx.ext.intersphinx',
-              'sphinxcontrib.autoprogram']
+              'sphinxcontrib.autoprogram',
+              'sphinx.ext.autosectionlabel']
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.5', None),
                        'matplotlib': ('http://matplotlib.sourceforge.net/', None)}
