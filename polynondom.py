@@ -583,7 +583,7 @@ class PolyNondom:
                    my_zlabel="r'$c^{\top}_3 x$'",
                    my_labelsize=8, my_fontsize=12,
                    my_style='sci'):
-        """Initialise labels."""
+        """Set labels for figure."""
         self._ax.tick_params(axis='x', labelsize=my_labelsize)
         plt.ticklabel_format(style=my_style, axis='x', scilimits=(0,0))
         self._ax.tick_params(axis='y', labelsize=my_labelsize)
