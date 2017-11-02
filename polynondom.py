@@ -30,7 +30,7 @@ Available classes
 
 from argparse import ArgumentParser
 from collections import Iterable
-from itertools import combinations, permutations, product
+from itertools import combinations, permutations, product, zip_longest
 import logging
 import math
 from numpy import array, dot, linspace, meshgrid
@@ -585,9 +585,9 @@ class PolyNondom:
                    my_style='sci'):
         """Set labels for figure."""
         self._ax.tick_params(axis='x', labelsize=my_labelsize)
-        plt.ticklabel_format(style=my_style, axis='x', scilimits=(0,0))
+        plt.ticklabel_format(style=my_style, axis='x', scilimits=(0,0), useMathText=True)
         self._ax.tick_params(axis='y', labelsize=my_labelsize)
-        plt.ticklabel_format(style=my_style, axis='y', scilimits=(0,0))
+        plt.ticklabel_format(style=my_style, axis='y', scilimits=(0,0), useMathText=True)
         self._ax.set_xlabel(my_xlabel, fontsize=my_fontsize)
         self._ax.set_ylabel(my_ylabel, fontsize=my_fontsize)
         if self._dim == 3:
@@ -599,7 +599,7 @@ class PolyNondom:
             self._ax.w_zaxis.line.set_visible(False)
         plt.pause(0.0001)
 
-    def _visualise_points(self, id, *, color, marker, marker_size):
+    def _visualise_points(self, id, *, color, marker, marker_size, annotate):
         """Visualises given points.
 
         Visualises given points and saves corresponding matplotlib objects 
@@ -615,7 +615,12 @@ class PolyNondom:
         self._ax_setter['x'](*self._ax_limits['x'])
         self._ax_setter['y'](*self._ax_limits['y'])
         self._ax_setter['z'](*self._ax_limits['z'])
+        if annotate:
+            for index, point in enumerate(zip_longest(x_coords, y_coords, z_coords, fillvalue=0)):
+                x, y, z = point
+                self._ax.text(x+0.5, y+0.5, z, r'$y^'+str(index)+'$', zdir='z')
         plt.pause(0.0001)
+
 
     def _visualise_lines(self, id, *, color, width, style):
         """Visualises line projections corresponding to given points.
@@ -642,7 +647,7 @@ class PolyNondom:
             plt.pause(0.0001)
 
     def visualise(self, id, *, my_color=None, my_width=0.8, my_style='--',
-                  my_marker='o', my_marker_size=40, with_lines=True):
+                  my_marker='o', my_marker_size=40, with_lines=True, with_text=True):
         """Visualises point sets corresponding to id.
         
         :param str id: identifier corresponding to (combinations of) \
@@ -673,7 +678,7 @@ class PolyNondom:
                 if self.points[item].points:
                     color = self.points[item].color if my_color is None else my_color
                     self._visualise_points(item, color=color, marker=my_marker,
-                                           marker_size=my_marker_size)
+                                           marker_size=my_marker_size, annotate=with_text)
                     if self._dim == 3 and with_lines:
                         self._visualise_lines(item, color=color, width=my_width,
                                               style=my_style)
